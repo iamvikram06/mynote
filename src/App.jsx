@@ -10,7 +10,7 @@ import ThemeToggle from "./components/ThemeToggle";
 
 // Utils
 import { loadNotes, saveNotes } from "./utils/storage";
-import { exportAsJson, exportAsMarkdown, importFromJson } from "./utils/io";
+import { importFromJson } from "./utils/io";
 
 function App() {
   const [notes, setNotes] = useState(() => loadNotes());
@@ -75,10 +75,17 @@ function App() {
     [notes, activeId]
   );
 
-  const NoteCard = ({ note }) => (
+  const cardBgClasses = [
+    "bg-sky-100",
+    "bg-rose-100",
+    "bg-amber-100",
+    "bg-blue-200",
+  ];
+
+  const NoteCard = ({ note, colorClass }) => (
     <button
       onClick={() => setActiveId(note.id)}
-      className="text-left rounded-xl border border-slate-200 dark:border-slate-800 p-4 hover:shadow-sm hover:bg-slate-50/60 dark:hover:bg-slate-900 transition-colors"
+      className={`text-left rounded-xl border border-slate-200 dark:border-slate-800 p-4 hover:shadow-sm transition-colors ${colorClass} dark:bg-slate-800`}
     >
       <div className="flex items-start justify-between">
         <h3 className="font-medium truncate mr-2">
@@ -88,7 +95,7 @@ function App() {
           {new Date(note.updatedAt).toLocaleDateString()}
         </span>
       </div>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 line-clamp-3">
+      <p className="mt-1 text-sm text-slate-700 dark:text-slate-300 line-clamp-3">
         {note.content}
       </p>
       <div className="mt-2 flex flex-wrap gap-1">
@@ -157,18 +164,6 @@ function App() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => exportAsJson(notes)}
-                  className="px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 text-sm hover:bg-slate-50 dark:hover:bg-slate-900"
-                >
-                  Export JSON
-                </button>
-                <button
-                  onClick={() => exportAsMarkdown(notes)}
-                  className="px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 text-sm hover:bg-slate-50 dark:hover:bg-slate-900"
-                >
-                  Export MD
-                </button>
                 <label className="px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 text-sm hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer">
                   Import JSON
                   <input
@@ -200,7 +195,7 @@ function App() {
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {recentTags.map((t) => (
+                {recentTags.map((t, i) => (
                   <button
                     key={t}
                     onClick={() =>
@@ -208,9 +203,11 @@ function App() {
                         prev.includes(t) ? prev : [...prev, t]
                       )
                     }
-                    className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-left hover:bg-slate-50 dark:hover:bg-slate-900"
+                    className={`rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-left hover:shadow-sm transition-colors ${
+                      cardBgClasses[i % cardBgClasses.length]
+                    } dark:bg-slate-800`}
                   >
-                    <div className="h-10 w-10 rounded-lg bg-slate-200 dark:bg-slate-800 mb-3" />
+                    <div className="h-10 w-10 rounded-lg bg-white/70 dark:bg-slate-700 mb-3" />
                     <p className="font-medium">{t}</p>
                     <p className="text-xs text-slate-500 mt-1">Open folder</p>
                   </button>
@@ -232,8 +229,12 @@ function App() {
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredNotes.map((n) => (
-                  <NoteCard key={n.id} note={n} />
+                {filteredNotes.map((n, i) => (
+                  <NoteCard
+                    key={n.id}
+                    note={n}
+                    colorClass={cardBgClasses[i % cardBgClasses.length]}
+                  />
                 ))}
               </div>
             </section>
