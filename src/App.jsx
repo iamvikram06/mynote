@@ -75,6 +75,30 @@ function App() {
     [notes, activeId]
   );
 
+  const [recentRange, setRecentRange] = useState("This Week");
+  const [notesRange, setNotesRange] = useState("Todays");
+
+  const TimeTabs = ({ value, onChange }) => {
+    const options = ["Todays", "This Week", "This Month"];
+    return (
+      <div className="flex items-center gap-3 text-sm">
+        {options.map((opt) => (
+          <button
+            key={opt}
+            className={`pb-1 border-b-2 transition-colors ${
+              value === opt
+                ? "border-slate-900 dark:border-slate-100 text-slate-900 dark:text-slate-100"
+                : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            }`}
+            onClick={() => onChange(opt)}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   const cardBgClasses = [
     "bg-sky-100",
     "bg-rose-100",
@@ -139,6 +163,31 @@ function App() {
           {/* Sidebar */}
           <aside className="hidden md:block col-span-3 lg:col-span-2">
             <div className="sticky top-4 space-y-4">
+              {/* Left rail quick actions */}
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4">
+                <p className="font-semibold tracking-tight">Add new</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-rose-500" />
+                  <span className="h-3 w-3 rounded-full bg-amber-400" />
+                  <span className="h-3 w-3 rounded-full bg-sky-500" />
+                </div>
+              </div>
+
+              <nav className="rounded-xl border border-slate-200 dark:border-slate-800 p-2">
+                {[
+                  { label: "Calendar" },
+                  { label: "Archive" },
+                  { label: "Trash" },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-900 text-sm"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+
               <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3">
                 <p className="text-xs uppercase text-slate-500 mb-2">Filters</p>
                 <TagFilter
@@ -190,9 +239,7 @@ function App() {
             <section>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">Recent Folders</h2>
-                <div className="md:hidden w-44">
-                  <SearchBar value={query} onChange={setQuery} />
-                </div>
+                <TimeTabs value={recentRange} onChange={setRecentRange} />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {recentTags.map((t, i) => (
@@ -212,6 +259,11 @@ function App() {
                     <p className="text-xs text-slate-500 mt-1">Open folder</p>
                   </button>
                 ))}
+                {/* New folder placeholder */}
+                <button className="rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 p-4 text-left hover:bg-slate-50/60 dark:hover:bg-slate-900">
+                  <div className="h-10 w-10 rounded-lg bg-slate-200 dark:bg-slate-800 mb-3 grid place-items-center"></div>
+                  <p className="font-medium">New folder</p>
+                </button>
                 {recentTags.length === 0 && (
                   <div className="col-span-2 md:col-span-4 text-sm text-slate-500">
                     No tags yet. Add tags to notes to see folders.
@@ -224,9 +276,7 @@ function App() {
             <section className="mt-8">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">My Notes</h2>
-                <span className="text-xs text-slate-500">
-                  {filteredNotes.length} items
-                </span>
+                <TimeTabs value={notesRange} onChange={setNotesRange} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredNotes.map((n, i) => (
@@ -236,6 +286,14 @@ function App() {
                     colorClass={cardBgClasses[i % cardBgClasses.length]}
                   />
                 ))}
+                {/* New note placeholder */}
+                <button
+                  onClick={createNote}
+                  className="rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 p-4 text-left hover:bg-slate-50/60 dark:hover:bg-slate-900"
+                >
+                  <div className="h-10 w-10 rounded-lg bg-slate-200 dark:bg-slate-800 mb-3" />
+                  <p className="font-medium">New Note</p>
+                </button>
               </div>
             </section>
 
