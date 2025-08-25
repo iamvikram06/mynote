@@ -92,12 +92,11 @@ function Sidebar({ activeView, onViewChange }) {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="w-3 h-3 bg-rose-500 rounded-full"></span>
-          <span className="w-3 h-3 bg-amber-500 rounded-full"></span>
-          <span className="w-3 h-3 bg-sky-500 rounded-full"></span>
-          <span className="w-3 h-3 bg-emerald-500 rounded-full"></span>
+      <div className="p-4 flex border-t border-slate-200 dark:border-slate-800">
+        <div className="flex items-center gap-1 mr-1">
+          <span className="w-2 h-2 bg-rose-500"></span>
+          <span className="w-2 h-2 bg-amber-500"></span>
+          <span className="w-2 h-2 bg-sky-500 "></span>
         </div>
         <div className="text-xs text-slate-500 dark:text-slate-400">
           Organize your thoughts

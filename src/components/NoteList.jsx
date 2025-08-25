@@ -38,19 +38,25 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
           className={`group relative cursor-pointer rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
             activeId === note.id
               ? `border-${
-                  note.status === "done"
+                  note.category === "notes"
+                    ? "purple"
+                    : note.status === "done"
                     ? "emerald"
                     : note.status === "in-progress"
                     ? "amber"
                     : "sky"
                 }-500 bg-${
-                  note.status === "done"
+                  note.category === "notes"
+                    ? "purple"
+                    : note.status === "done"
                     ? "emerald"
                     : note.status === "in-progress"
                     ? "amber"
                     : "sky"
                 }-50 dark:bg-${
-                  note.status === "done"
+                  note.category === "notes"
+                    ? "purple"
+                    : note.status === "done"
                     ? "emerald"
                     : note.status === "in-progress"
                     ? "amber"
@@ -62,8 +68,10 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
           {/* Active indicator */}
           {activeId === note.id && (
             <div
-              className={`rounded-r-full shadow-sm ${
-                note.status === "done"
+              className={`absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 rounded-r-full shadow-sm ${
+                note.category === "notes"
+                  ? "bg-purple-500"
+                  : note.status === "done"
                   ? "bg-emerald-500"
                   : note.status === "in-progress"
                   ? "bg-amber-500"
@@ -72,16 +80,18 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
             ></div>
           )}
 
-          {/* Color accent bar */}
-          <div
-            className={`absolute top-[-1px] left-0 right-0 h-2 rounded-t-lg ${
-              note.status === "done"
-                ? "bg-emerald-500"
-                : note.status === "in-progress"
-                ? "bg-amber-500"
-                : "bg-sky-500"
-            }`}
-          ></div>
+          {/* Color accent bar - only for todos */}
+          {note.category === "todo" && (
+            <div
+              className={`absolute top-[-1px] left-0 right-0 h-2 rounded-t-lg ${
+                note.status === "done"
+                  ? "bg-emerald-500"
+                  : note.status === "in-progress"
+                  ? "bg-amber-500"
+                  : "bg-sky-500"
+              }`}
+            ></div>
+          )}
 
           <div className="p-4">
             <div className="flex items-start justify-between gap-3 mb-2">
@@ -134,39 +144,50 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
 
             {/* Footer */}
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span className="flex items-center gap-1">
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                {new Date(note.updatedAt).toLocaleDateString()}
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1">
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 0118 0z"
+                    />
+                  </svg>
+                  {new Date(note.updatedAt).toLocaleDateString()}
+                </span>
+              </div>
 
-              {/* Status indicator */}
-              <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  note.status === "done"
-                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
+              {/* Status indicator - only for todos */}
+              {note.category === "todo" && (
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    note.status === "done"
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
+                      : note.status === "in-progress"
+                      ? "bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400"
+                      : "bg-sky-100 text-sky-700 dark:bg-sky-900/20 dark:text-sky-400"
+                  }`}
+                >
+                  {note.status === "done"
+                    ? "✓ Done"
                     : note.status === "in-progress"
-                    ? "bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400"
-                    : "bg-sky-100 text-sky-700 dark:bg-sky-900/20 dark:text-sky-400"
-                }`}
-              >
-                {note.status === "done"
-                  ? "✓ Done"
-                  : note.status === "in-progress"
-                  ? "⟳ In Progress"
-                  : "○ Todo"}
-              </span>
+                    ? "⟳ In Progress"
+                    : ""}
+                </span>
+              )}
+
+              {/* Notes indicator - only for notes */}
+              {note.category === "notes" && (
+                <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400">
+                  📝 Notes
+                </span>
+              )}
             </div>
           </div>
         </div>

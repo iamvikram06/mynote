@@ -54,7 +54,8 @@ function App() {
       title: "Untitled",
       content: "",
       tags: [],
-      status: "todo",
+      category: activeView === "notes" ? "notes" : "todo",
+      status: activeView === "notes" ? undefined : "todo",
       updatedAt: Date.now(),
     };
     setNotes((prev) => [newNote, ...prev]);
@@ -78,6 +79,14 @@ function App() {
     setNotes((prev) =>
       prev.map((n) =>
         n.id === id ? { ...n, status, updatedAt: Date.now() } : n
+      )
+    );
+  };
+
+  const updateNoteCategory = (id, category) => {
+    setNotes((prev) =>
+      prev.map((n) =>
+        n.id === id ? { ...n, category, updatedAt: Date.now() } : n
       )
     );
   };
@@ -186,6 +195,7 @@ function App() {
                             updateNote(selected.id, (n) => ({ ...n, tags }))
                           }
                           onUpdateStatus={updateNoteStatus}
+                          onUpdateCategory={updateNoteCategory}
                           onClose={() => setActiveId(null)}
                         />
                       </motion.div>
@@ -271,6 +281,7 @@ function App() {
                             updateNote(selected.id, (n) => ({ ...n, tags }))
                           }
                           onUpdateStatus={updateNoteStatus}
+                          onUpdateCategory={updateNoteCategory}
                           onClose={() => setActiveId(null)}
                         />
                       </div>
@@ -325,6 +336,7 @@ function App() {
                             updateNote(selected.id, (n) => ({ ...n, tags }))
                           }
                           onUpdateStatus={updateNoteStatus}
+                          onUpdateCategory={updateNoteCategory}
                           onClose={() => setActiveId(null)}
                         />
                       </div>

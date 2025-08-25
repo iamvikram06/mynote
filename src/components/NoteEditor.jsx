@@ -1,6 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 
-function NoteEditor({ note, onChange, onUpdateTags, onUpdateStatus, onClose }) {
+function NoteEditor({
+  note,
+  onChange,
+  onUpdateTags,
+  onUpdateStatus,
+  onUpdateCategory,
+  onClose,
+}) {
   const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content);
   const [tagInput, setTagInput] = useState("");
@@ -32,6 +39,20 @@ function NoteEditor({ note, onChange, onUpdateTags, onUpdateStatus, onClose }) {
     const nextTags = (note.tags || []).filter((x) => x !== t);
     onUpdateTags(nextTags);
   };
+
+  const categoryOptions = [
+    {
+      value: "notes",
+      label: "Notes",
+      color:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+    },
+    {
+      value: "todo",
+      label: "Todo",
+      color: "bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200",
+    },
+  ];
 
   const statusOptions = [
     {
@@ -82,31 +103,53 @@ function NoteEditor({ note, onChange, onUpdateTags, onUpdateStatus, onClose }) {
           </button>
         )}
       </div>
-      
+
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title"
         className="w-full bg-transparent text-lg md:text-xl font-semibold outline-none placeholder:text-slate-400 text-slate-900 dark:text-slate-100"
       />
-      {onUpdateStatus && (
-        <div className="mt-2 flex items-center gap-2">
-          <label className="text-xs text-slate-600 dark:text-slate-400">
-            Status:
-          </label>
-          <select
-            value={note.status || "todo"}
-            onChange={(e) => onUpdateStatus(note.id, e.target.value)}
-            className="text-xs px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-400 text-slate-900 dark:text-slate-100"
-          >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      {/* Category and Status Selection */}
+      <div className="mt-2 flex items-center gap-4">
+        {onUpdateCategory && (
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-600 dark:text-slate-400">
+              Category:
+            </label>
+            <select
+              value={note.category || "notes"}
+              onChange={(e) => onUpdateCategory(note.id, e.target.value)}
+              className="text-xs px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-400 text-slate-900 dark:text-slate-100"
+            >
+              {categoryOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {onUpdateStatus && note.category === "todo" && (
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-600 dark:text-slate-400">
+              Status:
+            </label>
+            <select
+              value={note.status || "todo"}
+              onChange={(e) => onUpdateStatus(note.id, e.target.value)}
+              className="text-xs px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 text-slate-900 dark:text-slate-100"
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
       <div className="mt-2 flex items-center gap-2">
         <input
           value={tagInput}
