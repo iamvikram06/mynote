@@ -63,13 +63,15 @@ import React, { useState } from "react";
                 whiteSpace: "pre",
                 transition: "color 200ms ease, transform 200ms ease",
                 transitionDelay: mode === "alternating" ? "0ms" : `${delay}ms`,
-                color: isHighlighted ? "#Ffd500" : undefined,
+                color: isHighlighted ? "#facc15" : undefined,
                 transform: isHighlighted ? "scale(1.08)" : "none",
                 transformOrigin: "center bottom",
               }}
             >
               {main}
-              {trailing ? <span style={{ color: "#ffd500" }}>{trailing}</span> : null}
+              {trailing ? (
+                <span style={{ color: "#facc15" }}>{trailing}</span>
+              ) : null}
             </span>
           );
         })}

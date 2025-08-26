@@ -57,9 +57,9 @@ function KanbanView({ notes, activeId, onSelect, onDelete, onUpdateStatus }) {
   };
 
   return (
-    <div className="p-3 sm:p-4 md:p-6">
+    <div className="p-2 sm:p-4 md:p-6">
       {/* Board */}
-      <div className="flex gap-3 sm:gap-4 md:gap-6 overflow-x-auto pb-4">
+      <div className="flex gap-2 cursor-pointer sm:gap-4 md:gap-6 overflow-x-auto pb-4">
         {STATUSES.map((status) => (
           <div
             key={status.id}

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 function HelpModal({ open, onClose }) {
-  // internal mount + show state so we can play exit animation before unmounting
   const [mounted, setMounted] = useState(open);
   const [show, setShow] = useState(open);
 
@@ -43,7 +42,7 @@ function HelpModal({ open, onClose }) {
         >
           <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800">
             <h2 id="help-modal-title" className="text-lg font-semibold">
-              How to use MyNote
+              How to use MY NOTES<span className="text-yellow-500">.</span>
             </h2>
             <button
               onClick={onClose}

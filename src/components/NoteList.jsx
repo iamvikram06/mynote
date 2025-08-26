@@ -1,6 +1,6 @@
 import React from "react";
 
-const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
+const NoteList = ({ notes, activeId, onSelect, onDelete, layout = "list" }) => {
   if (notes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4 sm:p-8 text-center">
@@ -78,25 +78,37 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
     return "bg-sky-500";
   };
 
+  const containerClass =
+    layout === "grid"
+      ? "p-2 sm:p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+      : "p-2 sm:p-4 space-y-2 sm:space-y-3";
+
   return (
-    <div className="p-2 sm:p-4 space-y-2 sm:space-y-3">
+    <div className={containerClass}>
       {notes.map((note) => (
         <div
           key={note.id}
           onClick={() => onSelect(note.id)}
-          className={`group relative cursor-pointer rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${getNoteStyles(note, activeId === note.id)}`}
+          className={`group relative cursor-pointer rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${getNoteStyles(
+            note,
+            activeId === note.id
+          )}`}
         >
           {/* Active indicator */}
           {activeId === note.id && (
             <div
-              className={`absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 rounded-r-full shadow-sm ${getActiveIndicatorColor(note)}`}
+              className={`absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 rounded-r-full shadow-sm ${getActiveIndicatorColor(
+                note
+              )}`}
             ></div>
           )}
 
           {/* Color accent bar - only for todos */}
           {note.category === "todo" && (
             <div
-              className={`absolute top-[-1px] left-0 right-0 h-2 rounded-t-lg ${getTopBarColor(note)}`}
+              className={`absolute top-[-1px] left-0 right-0 h-2 rounded-t-lg ${getTopBarColor(
+                note
+              )}`}
             ></div>
           )}
 
@@ -168,7 +180,9 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
               {/* Status indicator - only for todos */}
               {note.category === "todo" && (
                 <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(note)}`}
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                    note
+                  )}`}
                 >
                   {getStatusText(note)}
                 </span>

@@ -30,7 +30,7 @@ const LandingPage = ({ onGetStarted }) => {
           }}
         >
           <div
-            className="w-80 h-80 rounded-full blur-3xl opacity-60 mix-blend-screen"
+            className="w-48 h-48 sm:w-80 sm:h-80 rounded-full blur-3xl opacity-60 mix-blend-screen"
             style={{
               background:
                 "radial-gradient(40% 40% at 50% 50%, rgba(250,204,21,0.45), rgba(56,189,248,0.35), rgba(99,102,241,0.25), rgba(255,255,255,0))",
@@ -77,7 +77,7 @@ const LandingPage = ({ onGetStarted }) => {
             <div
               onClick={onGetStarted}
               className="
-          p-2
+          p-1
           rounded-md
           text-sm
           text-white
@@ -88,7 +88,7 @@ const LandingPage = ({ onGetStarted }) => {
           border
           "
             >
-              Start now!
+              Step In
             </div>
           </div>
         </div>

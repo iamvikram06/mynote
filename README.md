@@ -1,3 +1,25 @@
+# mynote
+
+## Optional: Enable Firebase cloud sync
+
+You can optionally enable Firebase authentication and cloud sync. If you do, users can toggle "Cloud" in the app header and sign in with Google to store notes in Firestore instead of localStorage.
+
+Steps:
+- Create a Firebase project and enable Authentication (Google) and Firestore.
+- Add your Firebase config to the app. You can provide it at runtime via a global `window.__FIREBASE_CONFIG__` object, or add environment variables (create a `.env` file at project root):
+
+	REACT_APP_FIREBASE_API_KEY=your_api_key
+	REACT_APP_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+	REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+	REACT_APP_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+	REACT_APP_FIREBASE_MESSAGING_SENDER_ID=...
+	REACT_APP_FIREBASE_APP_ID=...
+
+- Install Firebase (already added in package.json). Then run the app; the Cloud toggle and sign-in button appear in the header when Firebase is configured.
+
+Notes:
+- Cloud mode is optional. When disabled the app continues to use localStorage.
+- Turning on Cloud without signing in will not sync notes; sign in with Google after enabling Cloud.
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

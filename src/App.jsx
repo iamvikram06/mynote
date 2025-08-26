@@ -12,11 +12,25 @@ import Sidebar from "./components/Sidebar";
 import TodoList from "./components/TodoList";
 import LandingPage from "./components/LandingPage";
 import HelpModal from "./components/HelpModal";
-import { FiHelpCircle } from "react-icons/fi";
 
 // Utils
-import { loadNotes, saveNotes } from "./utils/storage";
+import {
+  loadNotes,
+  saveNotes,
+  setStorageMode,
+  saveNoteRemote,
+} from "./utils/storage";
+import {
+  initFirebase,
+  signInWithGoogle,
+  signOut as fbSignOut,
+  onAuthChange,
+  fetchUserNotes,
+  saveUserNotesBulk,
+  saveUserNote,
+} from "./utils/firebase";
 import { useSpeechRecognition } from "./utils/speech";
+import { IoHelp } from "react-icons/io5";
 
 function App() {
   const [notes, setNotes] = useState(() => loadNotes());
@@ -28,14 +42,16 @@ function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [voiceRequested, setVoiceRequested] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  // Cloud/auth state
+  const [cloudEnabled, setCloudEnabled] = useState(false);
+  const [user, setUser] = useState(null);
+  const [firebaseReady, setFirebaseReady] = useState(false);
 
   // Speech recognition
   const {
     supported: speechSupported,
     listening: isListening,
     transcript,
-    // error is available if needed
-    // error: speechError,
     start: startListening,
     stop: stopListening,
     reset: resetSpeech,
@@ -67,6 +83,75 @@ function App() {
   useEffect(() => {
     saveNotes(notes);
   }, [notes]);
+
+  // Init firebase if env vars present (optional)
+  useEffect(() => {
+    // Try to read firebase config from window.__FIREBASE_CONFIG__ or env
+    const cfg =
+      window.__FIREBASE_CONFIG__ ||
+      (process.env.REACT_APP_FIREBASE_API_KEY
+        ? {
+            apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+            authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+            projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+            storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+            messagingSenderId:
+              process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+            appId: process.env.REACT_APP_FIREBASE_APP_ID,
+          }
+        : null);
+
+    if (cfg) {
+      try {
+        initFirebase(cfg);
+        setFirebaseReady(true);
+        // wire auth listener
+        const unsub = onAuthChange((u) => {
+          setUser(
+            u
+              ? { uid: u.uid, email: u.email, displayName: u.displayName }
+              : null
+          );
+        });
+        return () => unsub && unsub();
+      } catch (e) {
+        console.warn("Firebase init error:", e);
+      }
+    }
+  }, []);
+
+  // When cloud is enabled and user is set, switch storage mode and load remote notes
+  useEffect(() => {
+    if (cloudEnabled && user) {
+      // set storage to cloud (provide implementation)
+      setStorageMode(
+        "cloud",
+        {
+          fetchUserNotes: fetchUserNotes,
+          saveUserNotesBulk: saveUserNotesBulk,
+          saveUserNote: saveUserNote,
+        },
+        user.uid
+      );
+
+      // load remote notes and replace local state
+      (async () => {
+        try {
+          const remote = await fetchUserNotes(user.uid);
+          if (Array.isArray(remote) && remote.length > 0) {
+            setNotes(remote);
+          }
+        } catch (e) {
+          console.warn("Failed to load remote notes:", e);
+        }
+      })();
+    } else if (!cloudEnabled) {
+      // switch back to local
+      setStorageMode("local", null, null);
+      // keep current notes in state; they remain in localStorage via autosave
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cloudEnabled, user]);
 
   const createNoteFromVoice = (text) => {
     const raw = (text || "").trim();
@@ -111,6 +196,29 @@ function App() {
     };
     setNotes((prev) => [newNote, ...prev]);
     setActiveId(newNote.id);
+    // If cloud mode, save remote as well
+    if (cloudEnabled && user) {
+      saveNoteRemote({ ...newNote });
+    }
+  };
+
+  // Auth handlers
+  const signIn = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      console.warn("Sign-in failed:", e);
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await fbSignOut();
+      // when signing out, disable cloud mode
+      setCloudEnabled(false);
+    } catch (e) {
+      console.warn("Sign-out failed:", e);
+    }
   };
 
   const updateNote = (id, updater) => {
@@ -173,7 +281,7 @@ function App() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="min-h-dvh bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors"
+          className="min-h-[100dvh] bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors"
         >
           <div className="flex h-screen">
             {/* Mobile Sidebar Overlay */}
@@ -231,13 +339,27 @@ function App() {
                       {activeView === "todo" && "Todo List"}
                     </h1>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    {/* <button
                       onClick={createNote}
-                      className="rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-3 py-1.5 text-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400 whitespace-nowrap"
+                      className="rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-2 sm:px-3 py-1 sm:py-1.5 text-sm hover:opacity-90 focus:outline-none focus:ring-2 flex items-center gap-2"
                     >
-                      New Note
-                    </button>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">New Note</span>
+                    </button> */}
+
                     <button
                       onClick={() => {
                         if (!speechSupported) return;
@@ -255,7 +377,7 @@ function App() {
                           ? "Stop recording"
                           : "Add by voice"
                       }
-                      className={`rounded-md border px-2 py-1.5 text-sm focus:outline-none focus:ring-2 whitespace-nowrap flex items-center gap-1 ${
+                      className={`rounded-md border px-2 py-1 text-sm sm:py-1.5 focus:outline-none focus:ring-2 flex items-center gap-1 ${
                         isListening
                           ? "border-rose-500 text-rose-600 dark:text-rose-400 focus:ring-rose-400"
                           : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 focus:ring-slate-400"
@@ -267,7 +389,7 @@ function App() {
                       disabled={!speechSupported}
                     >
                       <svg
-                        className={`w-4 h-4 ${
+                        className={`w-4 h-4 align-middle ${
                           isListening ? "animate-pulse" : ""
                         }`}
                         fill="none"
@@ -281,14 +403,72 @@ function App() {
                           d="M12 1.5a3 3 0 013 3v6a3 3 0 11-6 0v-6a3 3 0 013-3zm7.5 9a7.5 7.5 0 01-15 0M12 19.5v3"
                         />
                       </svg>
-                      {isListening ? "Recording…" : "Voice"}
+                      <span className="hidden sm:inline">
+                        {isListening ? "Recording…" : "Voice to Note"}
+                      </span>
                     </button>
+
                     <button
                       onClick={() => setShowLanding(true)}
-                      className="rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 whitespace-nowrap"
+                      className="rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 px-2 sm:px-3 py-1 sm:py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 flex items-center gap-2"
                     >
-                      Home
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 12l9-9 9 9M4 10v8a2 2 0 002 2h3m10-10v8a2 2 0 01-2 2h-3"
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">Home</span>
                     </button>
+
+                    {/* Cloud storage toggle + auth */}
+                    <div className="flex items-center gap-2">
+                      <label className="flex items-center text-sm gap-2">
+                        <input
+                          type="checkbox"
+                          checked={cloudEnabled}
+                          onChange={(e) => setCloudEnabled(e.target.checked)}
+                          className="w-4 h-4"
+                          title="Enable cloud sync (requires Firebase config and sign-in)"
+                        />
+                        <span className="hidden sm:inline text-slate-600 dark:text-slate-300">
+                          Cloud
+                        </span>
+                      </label>
+                      {user ? (
+                        <button
+                          onClick={signOut}
+                          className="rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 px-2 py-1 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
+                          title="Sign out"
+                        >
+                          {user.displayName || user.email}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={signIn}
+                          disabled={!firebaseReady}
+                          className={`rounded-md border px-2 py-1 text-sm focus:outline-none flex items-center gap-2 ${
+                            !firebaseReady
+                              ? "opacity-40 cursor-not-allowed"
+                              : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300"
+                          }`}
+                          title={
+                            firebaseReady
+                              ? "Sign in with Google"
+                              : "Firebase not configured"
+                          }
+                        >
+                          Sign in
+                        </button>
+                      )}
+                    </div>
                     <ThemeToggle />
                   </div>
                 </div>
@@ -518,10 +698,10 @@ function App() {
               <button
                 onClick={() => setHelpOpen(true)}
                 className="fixed bottom-4 right-4 z-50 rounded-full p-3 shadow-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                title="Help"
+                title="How to use the app"
                 aria-label="Open help"
               >
-                <FiHelpCircle className="w-6 h-6" />
+                <IoHelp className="w-6 h-6" />
               </button>
             </div>
             {/* Help Modal */}
