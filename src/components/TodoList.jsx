@@ -376,7 +376,7 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                 ? "No pending tasks"
                 : "No completed tasks"}
             </h3>
-            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-sm">
+            <p className="text-sm text-center sm:text-base text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
               {filter === "all"
                 ? "Create your first task to get started with your productivity journey"
                 : filter === "pending"

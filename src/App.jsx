@@ -11,6 +11,8 @@ import KanbanView from "./components/KanbanView";
 import Sidebar from "./components/Sidebar";
 import TodoList from "./components/TodoList";
 import LandingPage from "./components/LandingPage";
+import HelpModal from "./components/HelpModal";
+import { FiHelpCircle } from "react-icons/fi";
 
 // Utils
 import { loadNotes, saveNotes } from "./utils/storage";
@@ -25,6 +27,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [voiceRequested, setVoiceRequested] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   // Speech recognition
   const {
@@ -362,7 +365,6 @@ function App() {
                               onUpdateStatus={updateNoteStatus}
                               onUpdateCategory={updateNoteCategory}
                               onClose={() => setActiveId(null)}
-                              enableVoice
                             />
                           </motion.div>
                         ) : (
@@ -449,7 +451,6 @@ function App() {
                               onUpdateStatus={updateNoteStatus}
                               onUpdateCategory={updateNoteCategory}
                               onClose={() => setActiveId(null)}
-                              enableVoice
                             />
                           </div>
                         </div>
@@ -513,7 +514,18 @@ function App() {
                   </div>
                 )}
               </main>
+              {/* Floating Help Button */}
+              <button
+                onClick={() => setHelpOpen(true)}
+                className="fixed bottom-4 right-4 z-50 rounded-full p-3 shadow-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                title="Help"
+                aria-label="Open help"
+              >
+                <FiHelpCircle className="w-6 h-6" />
+              </button>
             </div>
+            {/* Help Modal */}
+            <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
           </div>
         </motion.div>
       )}
