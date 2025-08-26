@@ -14,23 +14,23 @@ import LandingPage from "./components/LandingPage";
 import HelpModal from "./components/HelpModal";
 
 // Utils
-import {
-  loadNotes,
-  saveNotes,
-  setStorageMode,
-  saveNoteRemote,
-} from "./utils/storage";
+import { loadNotes, saveNotes, setStorageMode } from "./utils/storage";
 import {
   initFirebase,
-  signInWithGoogle,
   signOut as fbSignOut,
   onAuthChange,
   fetchUserNotes,
   saveUserNotesBulk,
   saveUserNote,
+  signUpWithEmail,
+  signInWithEmail,
+  sendResetEmail,
+  deleteUserNote,
 } from "./utils/firebase";
+import EmailAuthModal from "./components/EmailAuthModal";
 import { useSpeechRecognition } from "./utils/speech";
 import { IoHelp } from "react-icons/io5";
+import { enqueueSave, enqueueDelete, subscribeNoteStatus } from "./utils/sync";
 
 function App() {
   const [notes, setNotes] = useState(() => loadNotes());
@@ -46,6 +46,7 @@ function App() {
   const [cloudEnabled, setCloudEnabled] = useState(false);
   const [user, setUser] = useState(null);
   const [firebaseReady, setFirebaseReady] = useState(false);
+  const [emailAuthOpen, setEmailAuthOpen] = useState(false);
 
   // Speech recognition
   const {
@@ -138,13 +139,75 @@ function App() {
       (async () => {
         try {
           const remote = await fetchUserNotes(user.uid);
-          if (Array.isArray(remote) && remote.length > 0) {
-            setNotes(remote);
+          if (Array.isArray(remote)) {
+            // Merge strategy: if both local and remote have data, ask the user
+            const local = loadNotes();
+            if (local.length > 0 && remote.length > 0) {
+              // Ask user preference
+              const uploadLocal = window.confirm(
+                "Cloud data found. Click OK to upload local notes to cloud and keep local copy. Click Cancel to continue to other choices."
+              );
+              if (uploadLocal) {
+                // upload all local to cloud
+                saveUserNotesBulk(user.uid, local).catch((e) =>
+                  console.warn("Bulk upload failed:", e)
+                );
+                // keep local notes
+                setNotes(local.map((n) => ({ ...n, _syncStatus: "pending" })));
+              } else {
+                const useCloud = window.confirm(
+                  "Use cloud notes and replace local notes? Click OK to replace local with cloud. Click Cancel to merge (upload missing local notes)"
+                );
+                if (useCloud) {
+                  setNotes(
+                    remote.map((n) => ({ ...n, _syncStatus: "synced" }))
+                  );
+                } else {
+                  // merge: upload local notes that don't exist remotely
+                  const remoteIds = new Set(remote.map((r) => r.id));
+                  const toUpload = local.filter((l) => !remoteIds.has(l.id));
+                  if (toUpload.length > 0)
+                    saveUserNotesBulk(user.uid, toUpload).catch((e) =>
+                      console.warn("Bulk merge upload failed:", e)
+                    );
+                  // combine remote + local uniques
+                  const combined = [...toUpload, ...remote].map((n) => ({
+                    ...n,
+                    _syncStatus: "synced",
+                  }));
+                  setNotes(combined);
+                }
+              }
+            } else if (remote.length > 0) {
+              setNotes(remote.map((n) => ({ ...n, _syncStatus: "synced" })));
+            } else {
+              // remote empty: keep local
+              const localOnly = loadNotes();
+              setNotes(
+                localOnly.map((n) => ({ ...n, _syncStatus: "pending" }))
+              );
+              // optional: upload local automatically
+            }
           }
         } catch (e) {
           console.warn("Failed to load remote notes:", e);
         }
       })();
+      // subscribe to per-note sync status updates
+      const unsubbers = [];
+      // subscribe to current notes
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      notes.forEach((n) => {
+        const unsub = subscribeNoteStatus(n.id, (status) => {
+          setNotes((prev) =>
+            prev.map((p) => (p.id === n.id ? { ...p, _syncStatus: status } : p))
+          );
+        });
+        unsubbers.push(unsub);
+      });
+      return () => {
+        unsubbers.forEach((u) => u && u());
+      };
     } else if (!cloudEnabled) {
       // switch back to local
       setStorageMode("local", null, null);
@@ -196,19 +259,27 @@ function App() {
     };
     setNotes((prev) => [newNote, ...prev]);
     setActiveId(newNote.id);
-    // If cloud mode, save remote as well
+    // If cloud mode, save remote as well (enqueue)
     if (cloudEnabled && user) {
-      saveNoteRemote({ ...newNote });
+      enqueueSave(user.uid, { ...newNote }, saveUserNote);
     }
   };
 
   // Auth handlers
-  const signIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (e) {
-      console.warn("Sign-in failed:", e);
-    }
+
+  const handleEmailSignIn = async (email, password) => {
+    await signInWithEmail(email, password);
+    setEmailAuthOpen(false);
+  };
+
+  const handleEmailSignUp = async (email, password) => {
+    await signUpWithEmail(email, password);
+    setEmailAuthOpen(false);
+  };
+
+  const handlePasswordReset = async (email) => {
+    await sendResetEmail(email);
+    setEmailAuthOpen(false);
   };
 
   const signOut = async () => {
@@ -222,32 +293,52 @@ function App() {
   };
 
   const updateNote = (id, updater) => {
-    setNotes((prev) =>
-      prev.map((n) =>
+    setNotes((prev) => {
+      const next = prev.map((n) =>
         n.id === id ? { ...updater(n), updatedAt: Date.now() } : n
-      )
-    );
+      );
+      if (cloudEnabled && user) {
+        const updated = next.find((x) => x.id === id);
+        if (updated) {
+          enqueueSave(user.uid, updated, saveUserNote);
+        }
+      }
+      return next;
+    });
   };
 
   const deleteNote = (id) => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
     if (activeId === id) setActiveId(null);
+    if (cloudEnabled && user) {
+      enqueueDelete(user.uid, id, deleteUserNote);
+    }
   };
 
   const updateNoteStatus = (id, status) => {
-    setNotes((prev) =>
-      prev.map((n) =>
+    setNotes((prev) => {
+      const next = prev.map((n) =>
         n.id === id ? { ...n, status, updatedAt: Date.now() } : n
-      )
-    );
+      );
+      if (cloudEnabled && user) {
+        const updated = next.find((x) => x.id === id);
+        if (updated) enqueueSave(user.uid, updated, saveUserNote);
+      }
+      return next;
+    });
   };
 
   const updateNoteCategory = (id, category) => {
-    setNotes((prev) =>
-      prev.map((n) =>
+    setNotes((prev) => {
+      const next = prev.map((n) =>
         n.id === id ? { ...n, category, updatedAt: Date.now() } : n
-      )
-    );
+      );
+      if (cloudEnabled && user) {
+        const updated = next.find((x) => x.id === id);
+        if (updated) enqueueSave(user.uid, updated, saveUserNote);
+      }
+      return next;
+    });
   };
 
   const selected = useMemo(
@@ -340,26 +431,7 @@ function App() {
                     </h1>
                   </div>
                   <div className="flex items-center gap-1 sm:gap-2">
-                    {/* <button
-                      onClick={createNote}
-                      className="rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-2 sm:px-3 py-1 sm:py-1.5 text-sm hover:opacity-90 focus:outline-none focus:ring-2 flex items-center gap-2"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                      <span className="hidden sm:inline">New Note</span>
-                    </button> */}
-
+                    {/* Voice / speech button */}
                     <button
                       onClick={() => {
                         if (!speechSupported) return;
@@ -408,6 +480,7 @@ function App() {
                       </span>
                     </button>
 
+                    {/* Home */}
                     <button
                       onClick={() => setShowLanding(true)}
                       className="rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 px-2 sm:px-3 py-1 sm:py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 flex items-center gap-2"
@@ -428,7 +501,7 @@ function App() {
                       <span className="hidden sm:inline">Home</span>
                     </button>
 
-                    {/* Cloud storage toggle + auth */}
+                    {/* Cloud toggle + auth */}
                     <div className="flex items-center gap-2">
                       <label className="flex items-center text-sm gap-2">
                         <input
@@ -451,24 +524,22 @@ function App() {
                           {user.displayName || user.email}
                         </button>
                       ) : (
-                        <button
-                          onClick={signIn}
-                          disabled={!firebaseReady}
-                          className={`rounded-md border px-2 py-1 text-sm focus:outline-none flex items-center gap-2 ${
-                            !firebaseReady
-                              ? "opacity-40 cursor-not-allowed"
-                              : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300"
-                          }`}
-                          title={
-                            firebaseReady
-                              ? "Sign in with Google"
-                              : "Firebase not configured"
-                          }
-                        >
-                          Sign in
-                        </button>
+                        <div>
+                          <button
+                            onClick={() => setEmailAuthOpen(true)}
+                            disabled={!firebaseReady}
+                            className={`rounded-md border px-2 py-1 text-sm focus:outline-none ${
+                              !firebaseReady
+                                ? "opacity-40 cursor-not-allowed"
+                                : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300"
+                            }`}
+                          >
+                            Sign in
+                          </button>
+                        </div>
                       )}
                     </div>
+
                     <ThemeToggle />
                   </div>
                 </div>
@@ -706,6 +777,13 @@ function App() {
             </div>
             {/* Help Modal */}
             <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+            <EmailAuthModal
+              open={emailAuthOpen}
+              onClose={() => setEmailAuthOpen(false)}
+              onSignIn={handleEmailSignIn}
+              onSignUp={handleEmailSignUp}
+              onReset={handlePasswordReset}
+            />
           </div>
         </motion.div>
       )}

@@ -146,6 +146,7 @@ function Sidebar({ activeView, onViewChange, onClose }) {
 
       {/* Footer */}
       <div className="p-4 flex border-t border-slate-200 dark:border-slate-800">
+      
         <div className="flex items-center gap-1 mr-1">
           <span className="w-2 h-2 bg-rose-500"></span>
           <span className="w-2 h-2 bg-amber-500"></span>

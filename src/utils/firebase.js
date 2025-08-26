@@ -5,8 +5,6 @@
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
-  signInWithPopup,
-  GoogleAuthProvider,
   signOut as fbSignOut,
   onAuthStateChanged,
 } from "firebase/auth";
@@ -24,14 +22,12 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
+import { deleteDoc } from "firebase/firestore";
 
 let app = null;
 let auth = null;
 let db = null;
 
-// If you want to bootstrap the app quickly, provide a default config here.
-// This uses the config you supplied; it's safe to override via
-// window.__FIREBASE_CONFIG__ or REACT_APP_ env vars in App.jsx.
 const DEFAULT_FIREBASE_CONFIG = {
   apiKey: "AIzaSyAdBof6xdEX-cI44HMMZVq4KDrMioOZSXY",
   authDomain: "my-notes0.firebaseapp.com",
@@ -71,12 +67,6 @@ export function onAuthChange(cb) {
   return onAuthStateChanged(auth, cb);
 }
 
-export async function signInWithGoogle() {
-  if (!auth) throw new Error("Firebase not initialized");
-  const provider = new GoogleAuthProvider();
-  return signInWithPopup(auth, provider);
-}
-
 export async function signUpWithEmail(email, password) {
   if (!auth) throw new Error("Firebase not initialized");
   return createUserWithEmailAndPassword(auth, email, password);
@@ -114,6 +104,12 @@ export async function saveUserNote(userId, note) {
   if (!db) throw new Error("Firestore not initialized");
   const ref = doc(db, "users", userId, "notes", note.id);
   await setDoc(ref, note, { merge: true });
+}
+
+export async function deleteUserNote(userId, noteId) {
+  if (!db) throw new Error("Firestore not initialized");
+  const ref = doc(db, "users", userId, "notes", noteId);
+  await deleteDoc(ref);
 }
 
 export async function saveUserNotesBulk(userId, notes) {

@@ -145,6 +145,39 @@ const NoteList = ({ notes, activeId, onSelect, onDelete, layout = "list" }) => {
                   />
                 </svg>
               </button>
+              {/* Sync status */}
+              <div className="absolute top-2 right-2">
+                {note._syncStatus === "syncing" ||
+                note._syncStatus === "pending" ? (
+                  <svg
+                    className="w-4 h-4 animate-spin text-slate-500"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+                    />
+                  </svg>
+                ) : note._syncStatus === "error" ? (
+                  <span className="inline-flex items-center px-2 py-1 rounded bg-rose-100 text-rose-700 text-xs">
+                    !
+                  </span>
+                ) : note._syncStatus === "synced" ? (
+                  <span className="inline-flex items-center px-2 py-1 rounded bg-emerald-100 text-emerald-700 text-xs">
+                    ✓
+                  </span>
+                ) : null}
+              </div>
             </div>
 
             {/* Tags */}
