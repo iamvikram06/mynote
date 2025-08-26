@@ -41,37 +41,21 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6">
       {/* Header */}
-      <div className="mb-8">
-        {/* <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Task Management
-              </h2>
-              <p className="text-slate-600 dark:text-slate-400">Organize your tasks and track your progress</p>
-            </div>
-          </div>
-        </div> */}
-
+      <div className="mb-6 sm:mb-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm"
+            className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-3 sm:p-4 border border-slate-200 dark:border-slate-700 shadow-sm"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-slate-500 rounded-xl flex items-center justify-center">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-500 rounded-xl flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-white"
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -85,10 +69,10 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                   {stats.total}
                 </p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                   Total Tasks
                 </p>
               </div>
@@ -99,12 +83,12 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-800 shadow-sm"
+            className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-3 sm:p-4 border border-amber-200 dark:border-amber-800 shadow-sm"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-xl flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-white"
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -118,10 +102,10 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">
+                <p className="text-xl sm:text-2xl font-bold text-yellow-700 dark:text-yellow-400">
                   {stats.pending}
                 </p>
-                <p className="text-sm text-yellow-600 dark:text-yellow-500">
+                <p className="text-xs sm:text-sm text-yellow-600 dark:text-yellow-500">
                   Pending
                 </p>
               </div>
@@ -132,12 +116,12 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-4 border border-emerald-200 dark:border-emerald-800 shadow-sm"
+            className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-3 sm:p-4 border border-emerald-200 dark:border-emerald-800 shadow-sm sm:col-span-2 md:col-span-1"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-white"
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -151,10 +135,10 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-green-700 dark:text-green-400">
+                <p className="text-xl sm:text-2xl font-bold text-green-700 dark:text-green-400">
                   {stats.completed}
                 </p>
-                <p className="text-sm text-green-600 dark:text-green-500">
+                <p className="text-xs sm:text-sm text-green-600 dark:text-green-500">
                   Completed
                 </p>
               </div>
@@ -163,19 +147,19 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <span className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
               Overall Progress
             </span>
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+            <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
               {stats.total > 0
                 ? Math.round((stats.completed / stats.total) * 100)
                 : 0}
               %
             </span>
           </div>
-          <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
+          <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 sm:h-3">
             <motion.div
               initial={{ width: 0 }}
               animate={{
@@ -184,18 +168,18 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                 }%`,
               }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="h-3 bg-emerald-500 rounded-full shadow-sm"
+              className="h-2 sm:h-3 bg-emerald-500 rounded-full shadow-sm"
             ></motion.div>
           </div>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2">
           {filters.map((filterOption) => (
             <button
               key={filterOption.id}
               onClick={() => setFilter(filterOption.id)}
-              className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap ${
                 filter === filterOption.id
                   ? `${filterOption.color} text-white shadow-lg`
                   : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -208,7 +192,7 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
       </div>
 
       {/* Todo Items */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         <AnimatePresence mode="wait">
           {filteredNotes.map((note, index) => (
             <motion.div
@@ -229,15 +213,15 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                 <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 bg-blue-500 rounded-r-full shadow-sm"></div>
               )}
 
-              <div className="p-4">
-                <div className="flex items-start gap-4">
+              <div className="p-3 sm:p-4">
+                <div className="flex items-start gap-3 sm:gap-4">
                   {/* Checkbox */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleStatus(note.id);
                     }}
-                    className={`flex-shrink-0 w-6 h-6 rounded-lg border-2 transition-all duration-200 flex items-center justify-center ${
+                    className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-lg border-2 transition-all duration-200 flex items-center justify-center ${
                       note.status === "done"
                         ? "bg-green-500 border-green-500 text-white"
                         : "border-slate-300 dark:border-slate-600 hover:border-green-400 dark:hover:border-green-500"
@@ -245,7 +229,7 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                   >
                     {note.status === "done" && (
                       <svg
-                        className="w-4 h-4"
+                        className="w-3 h-3 sm:w-4 sm:h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -263,7 +247,7 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <h4
-                      className={`font-semibold mb-2 line-clamp-1 transition-all duration-200 ${
+                      className={`font-semibold mb-1 sm:mb-2 line-clamp-1 transition-all duration-200 text-sm sm:text-base ${
                         note.status === "done"
                           ? "text-slate-500 dark:text-slate-400 line-through"
                           : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
@@ -272,7 +256,7 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                       {note.title || "Untitled"}
                     </h4>
                     <p
-                      className={`text-sm line-clamp-2 leading-relaxed transition-all duration-200 ${
+                      className={`text-xs sm:text-sm line-clamp-2 leading-relaxed transition-all duration-200 ${
                         note.status === "done"
                           ? "text-slate-400 dark:text-slate-500 line-through"
                           : "text-slate-600 dark:text-slate-400"
@@ -289,10 +273,10 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                         e.stopPropagation();
                         onDelete(note.id);
                       }}
-                      className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 hover:text-red-700 dark:hover:text-red-400 transform hover:scale-110 transition-all duration-200"
+                      className="p-1.5 sm:p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 hover:text-red-700 dark:hover:text-red-400 transform hover:scale-110 transition-all duration-200"
                     >
                       <svg
-                        className="w-4 h-4"
+                        className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -310,11 +294,11 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
 
                 {/* Tags */}
                 {note.tags && note.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3 ml-10">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-3 ml-8 sm:ml-10">
                     {note.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-700"
+                        className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-700"
                       >
                         #{tag}
                       </span>
@@ -323,7 +307,7 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                 )}
 
                 {/* Footer */}
-                <div className="flex items-center justify-between mt-3 ml-10 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center justify-between mt-2 sm:mt-3 ml-8 sm:ml-10 text-xs text-slate-500 dark:text-slate-400">
                   <span className="flex items-center gap-1">
                     <svg
                       className="w-3 h-3"
@@ -368,11 +352,11 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16"
+            className="text-center py-12 sm:py-16"
           >
-            <div className="w-24 h-24 bg-sky-100 dark:bg-sky-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg border-2 border-sky-200 dark:border-sky-700">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-sky-100 dark:bg-sky-900/30 rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg border-2 border-sky-200 dark:border-sky-700">
               <svg
-                className="w-12 h-12 text-sky-600 dark:text-sky-400"
+                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-sky-600 dark:text-sky-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -385,14 +369,14 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">
               {filter === "all"
                 ? "No tasks yet"
                 : filter === "pending"
                 ? "No pending tasks"
                 : "No completed tasks"}
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 max-w-sm">
+            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-sm">
               {filter === "all"
                 ? "Create your first task to get started with your productivity journey"
                 : filter === "pending"
