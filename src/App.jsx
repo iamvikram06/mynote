@@ -131,13 +131,13 @@ function App() {
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top Header */}
-          <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-4">
+          <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-4 px-responsive">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 {/* Mobile menu button */}
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="md:hidden p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="md:hidden p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 touch-target"
                 >
                   <svg
                     className="w-6 h-6"
@@ -163,7 +163,7 @@ function App() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={createNote}
-                  className="rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-3 py-1.5 text-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400 whitespace-nowrap"
+                  className="rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-3 py-1.5 text-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400 whitespace-nowrap touch-target"
                 >
                   New Note
                 </button>

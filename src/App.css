@@ -36,3 +36,57 @@
     transform: rotate(360deg);
   }
 }
+
+/* Note + editor animations */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes note-appear {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.995);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes editor-fade {
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .note-appear {
+    opacity: 0; /* start invisible, animation will fill forwards */
+    animation-name: note-appear;
+    animation-duration: 220ms;
+    animation-timing-function: cubic-bezier(.2,.9,.2,1);
+    animation-fill-mode: forwards;
+  }
+
+  .note-hover-glow:hover {
+    box-shadow: 0 10px 30px rgba(2,6,23,0.08), 0 2px 6px rgba(2,6,23,0.06);
+    transform: translateY(-2px) scale(1.01) !important;
+  }
+
+  .editor-fade {
+    animation-name: editor-fade;
+    animation-duration: 180ms;
+    animation-timing-function: cubic-bezier(.2,.9,.2,1);
+    animation-fill-mode: forwards;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .note-appear,
+  .editor-fade {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -75,7 +75,7 @@ function NoteEditor({
   ];
 
   return (
-    <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 sm:p-4 md:p-4">
+    <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 sm:p-4 md:p-4 editor-fade">
       {/* Header with close button */}
       <div className="flex items-center justify-between mb-3 sm:mb-4">
         <h3 className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -84,7 +84,7 @@ function NoteEditor({
         {onClose && (
           <button
             onClick={onClose}
-            className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors touch-target"
             title="Close note"
           >
             <svg

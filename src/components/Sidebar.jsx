@@ -62,7 +62,7 @@ function Sidebar({ activeView, onViewChange, onClose }) {
   ];
 
   return (
-    <div className="w-60 md:w-60 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full">
+    <div className="w-full sm:w-60 md:w-60 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full">
       {/* Logo/Header */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between">
@@ -100,7 +100,7 @@ function Sidebar({ activeView, onViewChange, onClose }) {
             <li key={item.id}>
               <button
                 onClick={() => onViewChange(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors touch-target ${
                   activeView === item.id
                     ? "bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border-l-4 border-sky-500"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"

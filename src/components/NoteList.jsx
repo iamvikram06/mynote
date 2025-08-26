@@ -31,11 +31,12 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
 
   return (
     <div className="p-2 sm:p-4 space-y-2 sm:space-y-3">
-      {notes.map((note) => (
+      {notes.map((note, idx) => (
         <div
           key={note.id}
           onClick={() => onSelect(note.id)}
-          className={`group relative cursor-pointer rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
+          style={{ animationDelay: `${Math.min(idx * 30, 240)}ms` }}
+          className={`note-appear note-hover-glow group relative cursor-pointer rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
             activeId === note.id
               ? `border-${
                   note.category === "notes"
@@ -110,7 +111,7 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
                   e.stopPropagation();
                   onDelete(note.id);
                 }}
-                className="opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 sm:p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 hover:text-red-700 dark:hover:text-red-400 flex-shrink-0"
+                className="opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 sm:p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 hover:text-red-700 dark:hover:text-red-400 flex-shrink-0 touch-target"
               >
                 <svg
                   className="w-3.5 h-3.5 sm:w-4 sm:h-4"
