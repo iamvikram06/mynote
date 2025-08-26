@@ -20,6 +20,7 @@ function App() {
   const [query, setQuery] = useState("");
   const [activeTags, setActiveTags] = useState([]);
   const [activeView, setActiveView] = useState("notes");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Derived
   const allTags = useMemo(() => {
@@ -96,19 +97,64 @@ function App() {
     [notes, activeId]
   );
 
+  // Close sidebar on mobile when view changes
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  }, [activeView]);
+
   return (
     <div className="min-h-dvh bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors">
       <div className="flex h-screen">
+        {/* Mobile Sidebar Overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         {/* Sidebar */}
-        <Sidebar activeView={activeView} onViewChange={setActiveView} />
+        <div
+          className={`fixed md:relative z-50 h-full transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          }`}
+        >
+          <Sidebar
+            activeView={activeView}
+            onViewChange={setActiveView}
+            onClose={() => setSidebarOpen(false)}
+          />
+        </div>
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top Header */}
-          <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4">
+          <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <h1 className="text-xl font-semibold">
+                {/* Mobile menu button */}
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="md:hidden p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                </button>
+
+                <h1 className="text-lg sm:text-xl font-semibold truncate">
                   {activeView === "notes" && "All Notes"}
                   {activeView === "kanban" && "Kanban Board"}
                   {activeView === "todo" && "Todo List"}
@@ -117,7 +163,7 @@ function App() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={createNote}
-                  className="rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-3 py-1.5 text-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  className="rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-3 py-1.5 text-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400 whitespace-nowrap"
                 >
                   New Note
                 </button>
@@ -129,9 +175,9 @@ function App() {
           {/* Content Area */}
           <main className="flex-1 overflow-hidden">
             {activeView === "notes" && (
-              <div className="h-full flex">
+              <div className="h-full flex flex-col lg:flex-row">
                 {/* Notes Sidebar */}
-                <div className="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900">
+                <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900">
                   {/* Header with search */}
                   <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800">
                     <div className="mb-3">
@@ -175,7 +221,7 @@ function App() {
                 </div>
 
                 {/* Note Editor */}
-                <div className="flex-1 bg-white dark:bg-slate-950">
+                <div className="flex-1 bg-white dark:bg-slate-950 min-h-0">
                   <AnimatePresence mode="wait">
                     {selected ? (
                       <motion.div
@@ -200,7 +246,7 @@ function App() {
                         />
                       </motion.div>
                     ) : (
-                      <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                      <div className="h-full flex flex-col items-center justify-center text-center p-4 sm:p-8">
                         <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
                           <svg
                             className="w-8 h-8 text-slate-400"

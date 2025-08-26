@@ -17,3 +17,151 @@ html {
 body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
+
+/* Responsive utilities */
+@layer utilities {
+  /* Mobile-first responsive text sizes */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl;
+  }
+  
+  /* Responsive spacing */
+  .p-responsive {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+  
+  .px-responsive {
+    @apply px-3 sm:px-4 md:px-6;
+  }
+  
+  .py-responsive {
+    @apply py-3 sm:py-4 md:py-6;
+  }
+  
+  /* Responsive gaps */
+  .gap-responsive {
+    @apply gap-2 sm:gap-3 md:gap-4;
+  }
+  
+  /* Responsive margins */
+  .m-responsive {
+    @apply m-2 sm:m-3 md:m-4;
+  }
+  
+  .mb-responsive {
+    @apply mb-3 sm:mb-4 md:mb-6;
+  }
+  
+  /* Mobile-specific utilities */
+  .mobile-only {
+    @apply block sm:hidden;
+  }
+  
+  .desktop-only {
+    @apply hidden sm:block;
+  }
+  
+  /* Touch-friendly button sizes */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Responsive container */
+  .container-responsive {
+    @apply w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6;
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  /* Ensure touch targets are large enough */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve scrolling on mobile */
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Better mobile typography */
+  h1 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  
+  h3 {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+}
+
+/* Tablet-specific styles */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Optimize for tablet landscape */
+  .container-responsive {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Desktop-specific styles */
+@media (min-width: 1025px) {
+  /* Optimize for larger screens */
+  .container-responsive {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Ensure crisp rendering on high DPI displays */
+  svg {
+    shape-rendering: geometricPrecision;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  /* Improve dark mode contrast on mobile */
+  .dark .bg-slate-800 {
+    background-color: rgb(30 41 59);
+  }
+}
+
+/* Print styles */
+@media print {
+  /* Hide interactive elements when printing */
+  button, [role="button"], .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure good contrast for printing */
+  * {
+    color: black !important;
+    background: white !important;
+  }
+}
