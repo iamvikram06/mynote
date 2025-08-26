@@ -1,6 +1,12 @@
 import React from "react";
+import AnimatedTitle from "./AnimatedTitle";
 
 function Sidebar({ activeView, onViewChange, onClose }) {
+  // const navigate = useNavigation();
+
+  // const home = {
+  //   navigate('/home');
+  // }
   const menuItems = [
     {
       id: "notes",
@@ -67,9 +73,14 @@ function Sidebar({ activeView, onViewChange, onClose }) {
       {/* Logo/Header */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl uppercase font-semibold hover:first-letter:text-yellow-400 cursor-pointer tracking-tight text-slate-900 dark:text-slate-100">
-            My Notes<span className="text-yellow-500">.</span>
-          </h1>
+          <AnimatedTitle
+            className="text-xl uppercase font-semibold tracking-tight text-slate-900 dark:text-slate-100"
+            ariaLabel="My Notes"
+            direction="forward"
+            mode="alternating"
+          >
+            {"My Notes."}
+          </AnimatedTitle>
           {/* Mobile close button */}
           {onClose && (
             <button

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
-
+import AnimatedTitle from "./AnimatedTitle";
 const LandingPage = ({ onGetStarted }) => {
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
   const [mounted, setMounted] = useState(false);
@@ -44,9 +44,12 @@ const LandingPage = ({ onGetStarted }) => {
       <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-900 dark:bg-slate-100 rounded-lg flex items-center justify-center">
+            <div
+              className="w-8 h-8 bg-slate-900 dark:bg-slate-100 rounded-lg flex items-center justify-center transition-transform transform hover:scale-105 hover:shadow-[0_8px_24px_rgba(245,158,11,0.12)] hover:bg-yellow-50 dark:hover:bg-yellow-900/10 cursor-pointer group"
+              aria-hidden="true"
+            >
               <svg
-                className="w-5 h-5 text-white dark:text-slate-900"
+                className="w-5 h-5 text-white dark:text-slate-900 group-hover:text-yellow-500 transition-colors"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -59,12 +62,14 @@ const LandingPage = ({ onGetStarted }) => {
                 />
               </svg>
             </div>
-            <span className="text-xl uppercase font-semibold hover:active:text-yellow-400">
-              My Notes
-              <span className="text-xl uppercase text-yellow-500 font-semibold">
-                .
-              </span>
-            </span>
+            <AnimatedTitle
+              className="text-xl uppercase font-semibold tracking-tight text-slate-900 dark:text-slate-100"
+              ariaLabel="My Notes"
+              direction="forward"
+              mode="alternating"
+            >
+              {"My Notes."}
+            </AnimatedTitle>
           </div>
           <div className="flex  gap-2">
             <ThemeToggle />
@@ -161,8 +166,7 @@ const LandingPage = ({ onGetStarted }) => {
               Everything You Need
             </h2>
             <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Powerful features designed to help you stay organized and
-              productive
+              Powerful features designed to stay you organized and productive
             </p>
           </motion.div>
 
@@ -349,8 +353,8 @@ const LandingPage = ({ onGetStarted }) => {
               Ready to Get Started?
             </h2>
             <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Join thousands of users who have already organized their thoughts
-              with MyNote. Export or import your notes anytime.
+              Join us to organize your life and thoughts with MyNote
+              <span className="text-yellow-500">.</span>
             </p>
 
             <motion.button
@@ -374,9 +378,6 @@ const LandingPage = ({ onGetStarted }) => {
                 />
               </svg>
             </motion.button>
-            <p className="mt-4 text-slate-500 dark:text-slate-400 text-sm">
-              Tip: You can back up or restore notes anytime via export/import.
-            </p>
           </motion.div>
         </div>
       </section>
@@ -386,7 +387,7 @@ const LandingPage = ({ onGetStarted }) => {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col items-center gap-3 text-center">
             <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
-              Made with
+              built with
               <svg
                 className="w-4 h-4 text-rose-500"
                 viewBox="0 0 24 24"
@@ -395,9 +396,9 @@ const LandingPage = ({ onGetStarted }) => {
               >
                 <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.197 2.25 12.634 2.25 9.318 2.25 6.284 4.649 4 7.5 4A5.5 5.5 0 0112 6.102 5.5 5.5 0 0116.5 4c2.851 0 5.25 2.284 5.25 5.318 0 3.316-2.438 5.879-4.739 8.188a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.218l-.022.012-.007.003a.75.75 0 01-.66 0z" />
               </svg>
-              for minimal productivity · Open source on
+              · Open source on
               <a
-                href="https://github.com/yourname/mynote"
+                href="https://github.com/iamvikram06/mynote"
                 target="_blank"
                 rel="noreferrer"
                 className="underline decoration-dotted underline-offset-4 hover:opacity-80"
@@ -406,7 +407,8 @@ const LandingPage = ({ onGetStarted }) => {
               </a>
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-500">
-              MyNote · Local-first · No sign-up · Offline ready · Open source
+              MyNote<span className="text-yellow-500">.</span> · Local-storage ·
+              No sign-up · Open source
             </p>
           </div>
         </div>
