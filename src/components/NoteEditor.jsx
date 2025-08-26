@@ -75,20 +75,20 @@ function NoteEditor({
   ];
 
   return (
-    <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 md:p-4">
+    <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 sm:p-4 md:p-4">
       {/* Header with close button */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-slate-600 dark:text-slate-400">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h3 className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
           Editing Note
         </h3>
         {onClose && (
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
             title="Close note"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -108,13 +108,14 @@ function NoteEditor({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title"
-        className="w-full bg-transparent text-lg md:text-xl font-semibold outline-none placeholder:text-slate-400 text-slate-900 dark:text-slate-100"
+        className="w-full bg-transparent text-base sm:text-lg md:text-xl font-semibold outline-none placeholder:text-slate-400 text-slate-900 dark:text-slate-100"
       />
+
       {/* Category and Status Selection */}
-      <div className="mt-2 flex items-center gap-4">
+      <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
         {onUpdateCategory && (
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-600 dark:text-slate-400">
+            <label className="text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
               Category:
             </label>
             <select
@@ -133,7 +134,7 @@ function NoteEditor({
 
         {onUpdateStatus && note.category === "todo" && (
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-600 dark:text-slate-400">
+            <label className="text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
               Status:
             </label>
             <select
@@ -150,7 +151,8 @@ function NoteEditor({
           </div>
         )}
       </div>
-      <div className="mt-2 flex items-center gap-2">
+
+      <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2">
         <input
           value={tagInput}
           onChange={(e) => setTagInput(e.target.value)}
@@ -165,11 +167,12 @@ function NoteEditor({
         />
         <button
           onClick={addTag}
-          className="text-xs px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-900 dark:text-slate-100"
+          className="text-xs px-3 py-1 rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-900 dark:text-slate-100 whitespace-nowrap"
         >
           Add
         </button>
       </div>
+
       <div className="mt-2 flex flex-wrap gap-1">
         {(note.tags || []).map((t) => (
           <span
@@ -186,11 +189,12 @@ function NoteEditor({
           </span>
         ))}
       </div>
+
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Start typing..."
-        className="mt-3 w-full min-h-[50vh] resize-none bg-transparent outline-none text-sm md:text-base leading-6 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+        className="mt-3 w-full min-h-[40vh] sm:min-h-[50vh] resize-none bg-transparent outline-none text-sm sm:text-base leading-6 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
       />
     </div>
   );
