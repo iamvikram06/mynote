@@ -26,7 +26,7 @@ const LandingPage = ({ onGetStarted }) => {
             type: "spring",
             stiffness: 120,
             damping: 20,
-            mass: 0.4,
+            mass: 0.1,
           }}
         >
           <div
@@ -59,14 +59,33 @@ const LandingPage = ({ onGetStarted }) => {
                 />
               </svg>
             </div>
-            <span className="text-xl uppercase font-semibold">
+            <span className="text-xl uppercase font-semibold hover:active:text-yellow-400">
               My Notes
               <span className="text-xl uppercase text-yellow-500 font-semibold">
                 .
               </span>
             </span>
           </div>
-          <ThemeToggle />
+          <div className="flex  gap-2">
+            <ThemeToggle />
+
+            <div
+              onClick={onGetStarted}
+              className="
+          p-2
+          rounded-md
+          text-sm
+          text-white
+          dark:text-black
+          cursor-pointer
+          dark:bg-white
+          bg-black
+          border
+          "
+            >
+              Start now!
+            </div>
+          </div>
         </div>
       </header>
 

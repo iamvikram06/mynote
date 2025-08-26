@@ -9,17 +9,14 @@ function HelpModal({ open, onClose }) {
     let timeout;
     if (open) {
       setMounted(true);
-      // wait a frame so transitions can run
-      requestAnimationFrame(() => setShow(true));
+      timeout = setTimeout(() => setShow(true), 20);
     } else {
       setShow(false);
-      // leave mounted for the duration of the exit animation
       timeout = setTimeout(() => setMounted(false), 300);
     }
     return () => clearTimeout(timeout);
   }, [open]);
 
-  // don't render at all when not mounted
   if (!mounted) return null;
 
   return (
@@ -129,22 +126,7 @@ function HelpModal({ open, onClose }) {
                   </li>
                   <li>Use the close button in the editor to deselect.</li>
                 </ul>
-              </div>
-
-              <div>
-                <h3 className="font-medium mb-1">Shortcuts</h3>
-                <ul className="list-disc pl-5 space-y-1 text-sm">
-                  <li>
-                    <strong>/</strong> focus search (click into the search bar
-                    on mobile).
-                  </li>
-                  <li>
-                    <strong>N</strong> create a new note (use header button on
-                    mobile).
-                  </li>
-                </ul>
-              </div>
-
+              </div>       
               <div>
                 <h3 className="font-medium mb-1">Storage</h3>
                 <p className="text-sm">

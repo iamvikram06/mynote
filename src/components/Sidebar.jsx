@@ -67,7 +67,7 @@ function Sidebar({ activeView, onViewChange, onClose }) {
       {/* Logo/Header */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl uppercase font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl uppercase font-semibold hover:first-letter:text-yellow-400 cursor-pointer tracking-tight text-slate-900 dark:text-slate-100">
             My Notes<span className="text-yellow-500">.</span>
           </h1>
           {/* Mobile close button */}
