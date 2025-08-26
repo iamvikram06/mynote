@@ -57,19 +57,21 @@ function KanbanView({ notes, activeId, onSelect, onDelete, onUpdateStatus }) {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-4 md:p-6">
       {/* Board */}
-      <div className="flex gap-6 overflow-x-auto pb-4">
+      <div className="flex gap-3 sm:gap-4 md:gap-6 overflow-x-auto pb-4">
         {STATUSES.map((status) => (
           <div
             key={status.id}
-            className={`flex-shrink-0 w-80 rounded-lg border ${status.color} p-4`}
+            className={`flex-shrink-0 w-64 sm:w-72 md:w-80 rounded-lg border ${status.color} p-3 sm:p-4`}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, status.id)}
           >
-            <div className={`${status.headerColor} -m-4 mb-4 p-4 rounded-t-lg`}>
+            <div
+              className={`${status.headerColor} -m-3 sm:-m-4 mb-3 sm:mb-4 p-3 sm:p-4 rounded-t-lg`}
+            >
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm uppercase tracking-wide text-white">
+                <h3 className="font-semibold text-xs sm:text-sm uppercase tracking-wide text-white">
                   {status.label}
                 </h3>
                 <span className="text-xs bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full text-white font-medium">
@@ -78,7 +80,7 @@ function KanbanView({ notes, activeId, onSelect, onDelete, onUpdateStatus }) {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <AnimatePresence>
                 {(notesByStatus[status.id] || []).map((note) => (
                   <motion.div
@@ -91,14 +93,16 @@ function KanbanView({ notes, activeId, onSelect, onDelete, onUpdateStatus }) {
                     draggable
                     onDragStart={(e) => handleDragStart(e, note)}
                     onDragEnd={handleDragEnd}
-                    className={`group cursor-pointer rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-sm hover:shadow-md transition-all ${
+                    className={`group cursor-pointer rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 sm:p-3 shadow-sm hover:shadow-md transition-all ${
                       activeId === note.id ? "ring-2 ring-blue-500" : ""
-                    } ${draggedNote?.id === note.id ? "opacity-50" : ""} hover:border-slate-300 dark:hover:border-slate-600`}
+                    } ${
+                      draggedNote?.id === note.id ? "opacity-50" : ""
+                    } hover:border-slate-300 dark:hover:border-slate-600`}
                     onClick={() => onSelect(note.id)}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm truncate mb-1 text-slate-900 dark:text-slate-100">
+                        <h4 className="font-medium text-xs sm:text-sm truncate mb-1 text-slate-900 dark:text-slate-100">
                           {note.title || "Untitled"}
                         </h4>
                         <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-2">
@@ -123,10 +127,10 @@ function KanbanView({ notes, activeId, onSelect, onDelete, onUpdateStatus }) {
                           e.stopPropagation();
                           onDelete(note.id);
                         }}
-                        className="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                       >
                         <svg
-                          className="w-4 h-4"
+                          className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -146,10 +150,10 @@ function KanbanView({ notes, activeId, onSelect, onDelete, onUpdateStatus }) {
 
               {/* Empty state for column */}
               {(notesByStatus[status.id] || []).length === 0 && (
-                <div className="text-center py-8 text-slate-400 dark:text-slate-500">
-                  <div className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-2">
+                <div className="text-center py-6 sm:py-8 text-slate-400 dark:text-slate-500">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-2">
                     <svg
-                      className="w-4 h-4"
+                      className="w-3 h-3 sm:w-4 sm:h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

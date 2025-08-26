@@ -3,10 +3,10 @@ import React from "react";
 const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
   if (notes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-        <div className="w-20 h-20 bg-sky-100 dark:bg-sky-900/30 rounded-2xl flex items-center justify-center mb-6 shadow-lg border-2 border-sky-200 dark:border-sky-700">
+      <div className="flex flex-col items-center justify-center h-full p-4 sm:p-8 text-center">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-sky-100 dark:bg-sky-900/30 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-lg border-2 border-sky-200 dark:border-sky-700">
           <svg
-            className="w-10 h-10 text-sky-600 dark:text-sky-400"
+            className="w-8 h-8 sm:w-10 sm:h-10 text-sky-600 dark:text-sky-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -19,10 +19,10 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">
+        <h3 className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">
           No notes found
         </h3>
-        <p className="text-slate-500 dark:text-slate-400 max-w-sm">
+        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-sm">
           Try adjusting your search or create your first note to get started
         </p>
       </div>
@@ -30,7 +30,7 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
   }
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-2 sm:p-4 space-y-2 sm:space-y-3">
       {notes.map((note) => (
         <div
           key={note.id}
@@ -93,13 +93,13 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
             ></div>
           )}
 
-          <div className="p-4">
-            <div className="flex items-start justify-between gap-3 mb-2">
+          <div className="p-3 sm:p-4">
+            <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2">
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-2 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-2 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-sm sm:text-base">
                   {note.title || "Untitled"}
                 </h4>
-                <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
                   {note.content || "No content"}
                 </p>
               </div>
@@ -110,10 +110,10 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
                   e.stopPropagation();
                   onDelete(note.id);
                 }}
-                className="opacity-0 group-hover:opacity-100 transition-all duration-200 p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 hover:text-red-700 dark:hover:text-red-400"
+                className="opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 sm:p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 hover:text-red-700 dark:hover:text-red-400 flex-shrink-0"
               >
                 <svg
-                  className="w-4 h-4"
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -130,11 +130,11 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
 
             {/* Tags */}
             {note.tags && note.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                 {note.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-700"
+                    className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-700"
                   >
                     #{tag}
                   </span>
@@ -144,7 +144,7 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
 
             {/* Footer */}
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <span className="flex items-center gap-1">
                   <svg
                     className="w-3 h-3"
@@ -159,7 +159,15 @@ const NoteList = ({ notes, activeId, onSelect, onDelete }) => {
                       d="M12 8v4l3 3m6-3a9 9 0 0118 0z"
                     />
                   </svg>
-                  {new Date(note.updatedAt).toLocaleDateString()}
+                  <span className="hidden sm:inline">
+                    {new Date(note.updatedAt).toLocaleDateString()}
+                  </span>
+                  <span className="sm:hidden">
+                    {new Date(note.updatedAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
                 </span>
               </div>
 
