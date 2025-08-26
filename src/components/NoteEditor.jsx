@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useSpeechRecognition } from "../utils/speech";
 
 function NoteEditor({
   note,
@@ -7,15 +8,27 @@ function NoteEditor({
   onUpdateStatus,
   onUpdateCategory,
   onClose,
+  enableVoice = false,
 }) {
   const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content);
   const [tagInput, setTagInput] = useState("");
   const isInitialMount = useRef(true);
 
+  // Voice to text for appending into current note
+  const {
+    supported: speechSupported,
+    listening: isListening,
+    transcript,
+    start: startListening,
+    stop: stopListening,
+    reset: resetSpeech,
+  } = useSpeechRecognition({ continuous: false, interimResults: true });
+
   useEffect(() => {
     setTitle(note.title);
     setContent(note.content);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note.id]);
 
   useEffect(() => {
@@ -25,7 +38,7 @@ function NoteEditor({
     }
     const next = { ...note, title, content };
     onChange(next);
-  }, [title, content]);
+  }, [title, content, note, onChange]);
 
   const addTag = () => {
     const t = tagInput.trim();
@@ -34,6 +47,22 @@ function NoteEditor({
     onUpdateTags(nextTags);
     setTagInput("");
   };
+
+  // When voice recording ends, append transcript to content
+  useEffect(() => {
+    if (!enableVoice) return;
+    if (isListening) return;
+    if (transcript && transcript.trim()) {
+      const appended = content
+        ? content + "\n" + transcript.trim()
+        : transcript.trim();
+      setContent(appended);
+    }
+    // reset transcript after handled
+    if (!isListening) {
+      resetSpeech();
+    }
+  }, [isListening, transcript, enableVoice, content, resetSpeech]);
 
   const removeTag = (t) => {
     const nextTags = (note.tags || []).filter((x) => x !== t);
@@ -76,32 +105,78 @@ function NoteEditor({
 
   return (
     <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 sm:p-4 md:p-4">
-      {/* Header with close button */}
+      {/* Header with actions */}
       <div className="flex items-center justify-between mb-3 sm:mb-4">
         <h3 className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
           Editing Note
         </h3>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
-            title="Close note"
-          >
-            <svg
-              className="w-4 h-4 sm:w-5 sm:h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div className="flex items-center gap-1">
+          {enableVoice && (
+            <button
+              onClick={() => {
+                if (!speechSupported) return;
+                if (isListening) {
+                  stopListening();
+                } else {
+                  startListening();
+                }
+              }}
+              title={
+                !speechSupported
+                  ? "Speech recognition not supported"
+                  : isListening
+                  ? "Stop recording"
+                  : "Append by voice"
+              }
+              className={`p-1.5 sm:p-2 rounded-lg border transition-colors flex items-center gap-1 ${
+                isListening
+                  ? "border-rose-500 text-rose-600 dark:text-rose-400 hover:bg-rose-50/50 dark:hover:bg-rose-900/20"
+                  : "border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+              } ${!speechSupported ? "opacity-50 cursor-not-allowed" : ""}`}
+              disabled={!speechSupported}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        )}
+              <svg
+                className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                  isListening ? "animate-pulse" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 1.5a3 3 0 013 3v6a3 3 0 11-6 0v-6a3 3 0 013-3zm7.5 9a7.5 7.5 0 01-15 0M12 19.5v3"
+                />
+              </svg>
+              <span className="hidden sm:inline text-xs">
+                {isListening ? "Recording…" : "Voice"}
+              </span>
+            </button>
+          )}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+              title="Close note"
+            >
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       <input
