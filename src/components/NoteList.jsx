@@ -1,5 +1,6 @@
 import React from "react";
 
+
 const NoteList = ({ notes, activeId, onSelect, onDelete, layout = "list" }) => {
   if (notes.length === 0) {
     return (
@@ -69,6 +70,8 @@ const NoteList = ({ notes, activeId, onSelect, onDelete, layout = "list" }) => {
   const getStatusText = (note) => {
     if (note.status === "done") return "✓ Done";
     if (note.status === "in-progress") return "⟳ In Progress";
+    if (note.status === "todo") return "○ Todo";
+
     return "";
   };
 

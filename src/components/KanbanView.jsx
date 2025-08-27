@@ -150,8 +150,11 @@ function KanbanView({ notes, activeId, onSelect, onDelete, onUpdateStatus }) {
 
               {/* Empty state for column */}
               {(notesByStatus[status.id] || []).length === 0 && (
-                <div className="text-center py-6 sm:py-8 text-slate-400 dark:text-slate-500">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-2">
+                <div
+                  className="text-center py-6 sm:py-8 text-slate-400 dark:text-slate-500"
+                >
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-2"
+                >
                     <svg
                       className="w-3 h-3 sm:w-4 sm:h-4"
                       fill="none"

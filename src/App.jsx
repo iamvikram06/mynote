@@ -40,6 +40,7 @@ function App() {
   const [activeTags, setActiveTags] = useState([]);
   const [activeView, setActiveView] = useState("notes");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [voiceRequested, setVoiceRequested] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -398,6 +399,31 @@ function App() {
     }
   }, [activeView]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Toggle sidebar with Ctrl/Cmd + B
+      if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+        e.preventDefault();
+        setSidebarCollapsed(!sidebarCollapsed);
+
+        // Show toast notification
+        setToast({
+          visible: true,
+          message: !sidebarCollapsed ? "Sidebar hidden" : "Sidebar shown",
+          type: "success",
+        });
+        // Auto-hide after 2 seconds
+        setTimeout(() => {
+          setToast((prev) => ({ ...prev, visible: false }));
+        }, 2000);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [sidebarCollapsed]);
+
   return (
     <AnimatePresence mode="wait">
       {showLanding ? (
@@ -430,10 +456,14 @@ function App() {
 
             {/* Sidebar */}
             <div
-              className={`fixed md:relative z-50 h-full transition-transform duration-300 ease-in-out ${
+              className={`fixed md:relative z-50 h-full transition-all duration-300 ease-in-out ${
                 sidebarOpen
                   ? "translate-x-0"
                   : "-translate-x-full md:translate-x-0"
+              } ${
+                sidebarCollapsed
+                  ? "md:w-0 md:opacity-0 md:overflow-hidden"
+                  : "md:w-60 md:opacity-100"
               }`}
             >
               <Sidebar
@@ -464,6 +494,7 @@ function App() {
                 }}
                 onSignIn={() => setEmailAuthOpen(true)}
                 onSignOut={signOut}
+                collapsed={sidebarCollapsed}
               />
             </div>
 
@@ -472,11 +503,11 @@ function App() {
               {/* Top Header */}
               <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
                     {/* Mobile menu button */}
                     <button
                       onClick={() => setSidebarOpen(!sidebarOpen)}
-                      className="md:hidden p-2.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 touch-target"
+                      className="md:hidden p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 touch-target "
                     >
                       <svg
                         className="w-6 h-6"
@@ -490,6 +521,36 @@ function App() {
                           strokeWidth={2}
                           d="M4 6h16M4 12h16M4 18h16"
                         />
+                      </svg>
+                    </button>
+
+                    {/* Desktop sidebar toggle */}
+                    <button
+                      onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                      className="hidden md:flex p-2.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors bg-slate-100 dark:bg-slate-800"
+                      title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        {sidebarCollapsed ? (
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 12h16M4 18h16"
+                          />
+                        ) : (
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        )}
                       </svg>
                     </button>
 
