@@ -12,6 +12,7 @@ import Sidebar from "./components/Sidebar";
 import TodoList from "./components/TodoList";
 import LandingPage from "./components/LandingPage";
 import HelpModal from "./components/HelpModal";
+import Toast from "./components/Toast";
 
 // Utils
 import { loadNotes, saveNotes, setStorageMode } from "./utils/storage";
@@ -47,6 +48,14 @@ function App() {
   const [user, setUser] = useState(null);
   const [firebaseReady, setFirebaseReady] = useState(false);
   const [emailAuthOpen, setEmailAuthOpen] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState(null);
+  // Toast state
+  const [toast, setToast] = useState({
+    visible: false,
+    message: "",
+    type: "success",
+  });
 
   // Speech recognition
   const {
@@ -108,15 +117,22 @@ function App() {
         setFirebaseReady(true);
         // wire auth listener
         const unsub = onAuthChange((u) => {
+          console.log(
+            "Auth state changed:",
+            u ? `User: ${u.email}` : "No user"
+          );
           setUser(
             u
               ? { uid: u.uid, email: u.email, displayName: u.displayName }
               : null
           );
+          // Clear any auth errors when user state changes
+          setAuthError(null);
         });
         return () => unsub && unsub();
       } catch (e) {
         console.warn("Firebase init error:", e);
+        setAuthError("Failed to initialize Firebase");
       }
     }
   }, []);
@@ -195,8 +211,6 @@ function App() {
       })();
       // subscribe to per-note sync status updates
       const unsubbers = [];
-      // subscribe to current notes
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       notes.forEach((n) => {
         const unsub = subscribeNoteStatus(n.id, (status) => {
           setNotes((prev) =>
@@ -211,7 +225,6 @@ function App() {
     } else if (!cloudEnabled) {
       // switch back to local
       setStorageMode("local", null, null);
-      // keep current notes in state; they remain in localStorage via autosave
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cloudEnabled, user]);
@@ -229,7 +242,7 @@ function App() {
       content: raw,
       tags: [],
       category: "notes",
-      status: undefined,
+      status: null,
       updatedAt: Date.now(),
     };
     setNotes((prev) => [newNote, ...prev]);
@@ -254,7 +267,7 @@ function App() {
       content: "",
       tags: [],
       category: activeView === "notes" ? "notes" : "todo",
-      status: activeView === "notes" ? undefined : "todo",
+      status: activeView === "notes" ? null : "todo",
       updatedAt: Date.now(),
     };
     setNotes((prev) => [newNote, ...prev]);
@@ -268,18 +281,48 @@ function App() {
   // Auth handlers
 
   const handleEmailSignIn = async (email, password) => {
-    await signInWithEmail(email, password);
-    setEmailAuthOpen(false);
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      await signInWithEmail(email, password);
+      setEmailAuthOpen(false);
+      console.log("User signed in successfully");
+    } catch (error) {
+      console.error("Sign in error:", error);
+      setAuthError(error.message || "Failed to sign in");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const handleEmailSignUp = async (email, password) => {
-    await signUpWithEmail(email, password);
-    setEmailAuthOpen(false);
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      await signUpWithEmail(email, password);
+      setEmailAuthOpen(false);
+      console.log("User signed up successfully");
+    } catch (error) {
+      console.error("Sign up error:", error);
+      setAuthError(error.message || "Failed to sign up");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const handlePasswordReset = async (email) => {
-    await sendResetEmail(email);
-    setEmailAuthOpen(false);
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      await sendResetEmail(email);
+      setEmailAuthOpen(false);
+      console.log("Password reset email sent");
+    } catch (error) {
+      console.error("Password reset error:", error);
+      setAuthError(error.message || "Failed to send reset email");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const signOut = async () => {
@@ -318,7 +361,9 @@ function App() {
   const updateNoteStatus = (id, status) => {
     setNotes((prev) => {
       const next = prev.map((n) =>
-        n.id === id ? { ...n, status, updatedAt: Date.now() } : n
+        n.id === id
+          ? { ...n, status: status || null, updatedAt: Date.now() }
+          : n
       );
       if (cloudEnabled && user) {
         const updated = next.find((x) => x.id === id);
@@ -374,7 +419,7 @@ function App() {
           transition={{ duration: 0.3 }}
           className="min-h-[100dvh] bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors"
         >
-          <div className="flex h-screen">
+          <div className="flex h-screen overflow-hidden">
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
               <div
@@ -395,19 +440,43 @@ function App() {
                 activeView={activeView}
                 onViewChange={setActiveView}
                 onClose={() => setSidebarOpen(false)}
+                user={user}
+                firebaseReady={firebaseReady}
+                cloudEnabled={cloudEnabled}
+                onCloudToggle={(e) => {
+                  const enabled = e.target.checked;
+                  setCloudEnabled(enabled);
+
+                  // Show toast notification
+                  if (user) {
+                    setToast({
+                      visible: true,
+                      message: enabled
+                        ? "Cloud sync enabled"
+                        : "Cloud sync disabled",
+                      type: enabled ? "cloud" : "success",
+                    });
+                    // Auto-hide after 3 seconds
+                    setTimeout(() => {
+                      setToast((prev) => ({ ...prev, visible: false }));
+                    }, 3000);
+                  }
+                }}
+                onSignIn={() => setEmailAuthOpen(true)}
+                onSignOut={signOut}
               />
             </div>
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* Top Header */}
-              <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-4">
+              <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     {/* Mobile menu button */}
                     <button
                       onClick={() => setSidebarOpen(!sidebarOpen)}
-                      className="md:hidden p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      className="md:hidden p-2.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 touch-target"
                     >
                       <svg
                         className="w-6 h-6"
@@ -449,7 +518,7 @@ function App() {
                           ? "Stop recording"
                           : "Add by voice"
                       }
-                      className={`rounded-md border px-2 py-1 text-sm sm:py-1.5 focus:outline-none focus:ring-2 flex items-center gap-1 ${
+                      className={`rounded-md border px-2 py-1.5 sm:px-2 sm:py-1.5 text-sm focus:outline-none focus:ring-2 flex items-center gap-1 ${
                         isListening
                           ? "border-rose-500 text-rose-600 dark:text-rose-400 focus:ring-rose-400"
                           : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 focus:ring-slate-400"
@@ -501,45 +570,6 @@ function App() {
                       <span className="hidden sm:inline">Home</span>
                     </button>
 
-                    {/* Cloud toggle + auth */}
-                    <div className="flex items-center gap-2">
-                      <label className="flex items-center text-sm gap-2">
-                        <input
-                          type="checkbox"
-                          checked={cloudEnabled}
-                          onChange={(e) => setCloudEnabled(e.target.checked)}
-                          className="w-4 h-4"
-                          title="Enable cloud sync (requires Firebase config and sign-in)"
-                        />
-                        <span className="hidden sm:inline text-slate-600 dark:text-slate-300">
-                          Cloud
-                        </span>
-                      </label>
-                      {user ? (
-                        <button
-                          onClick={signOut}
-                          className="rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 px-2 py-1 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
-                          title="Sign out"
-                        >
-                          {user.displayName || user.email}
-                        </button>
-                      ) : (
-                        <div>
-                          <button
-                            onClick={() => setEmailAuthOpen(true)}
-                            disabled={!firebaseReady}
-                            className={`rounded-md border px-2 py-1 text-sm focus:outline-none ${
-                              !firebaseReady
-                                ? "opacity-40 cursor-not-allowed"
-                                : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300"
-                            }`}
-                          >
-                            Sign in
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
                     <ThemeToggle />
                   </div>
                 </div>
@@ -548,9 +578,9 @@ function App() {
               {/* Content Area */}
               <main className="flex-1 overflow-hidden">
                 {activeView === "notes" && (
-                  <div className="h-full flex flex-col lg:flex-row">
+                  <div className="h-full flex flex-col xl:flex-row">
                     {/* Notes Sidebar */}
-                    <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900">
+                    <div className="w-full xl:w-80 border-b xl:border-b-0 xl:border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900">
                       {/* Header with search */}
                       <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800">
                         <div className="mb-3">
@@ -768,7 +798,7 @@ function App() {
               {/* Floating Help Button */}
               <button
                 onClick={() => setHelpOpen(true)}
-                className="fixed bottom-4 right-4 z-50 rounded-full p-3 shadow-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="fixed bottom-4 right-4 z-50 rounded-full p-3 sm:p-3 shadow-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400 touch-target"
                 title="How to use the app"
                 aria-label="Open help"
               >
@@ -783,6 +813,15 @@ function App() {
               onSignIn={handleEmailSignIn}
               onSignUp={handleEmailSignUp}
               onReset={handlePasswordReset}
+              loading={authLoading}
+              error={authError}
+            />
+            {/* Toast Notification */}
+            <Toast
+              visible={toast.visible}
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
             />
           </div>
         </motion.div>

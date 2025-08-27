@@ -1,4 +1,4 @@
-// Minimal sync queue with exponential backoff and per-note status events
+
 let listeners = new Map(); // noteId -> Set(callback)
 const queue = []; // items: {type:'save'|'delete', userId, note, attempts}
 let running = false;

@@ -120,9 +120,6 @@ const LandingPage = ({ onGetStarted }) => {
                 No account required
               </span>
               <span className="px-4 py-2 rounded-full text-sm bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                Private by default
-              </span>
-              <span className="px-4 py-2 rounded-full text-sm bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                 Local Storage
               </span>
             </div>
@@ -170,7 +167,7 @@ const LandingPage = ({ onGetStarted }) => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -254,6 +251,34 @@ const LandingPage = ({ onGetStarted }) => {
                 Track tasks and manage your daily productivity
               </p>
             </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="text-left md:text-center rounded-2xl border border-slate-200 dark:border-slate-800 p-6 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors"
+            >
+              <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 flex items-center justify-center mb-4 md:mx-auto">
+                <svg
+                  className="w-8 h-8 text-slate-600 dark:text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-semibold mb-2">Cloud Sync</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                Optional cloud sync keeps your notes safe across devices
+              </p>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -329,11 +354,11 @@ const LandingPage = ({ onGetStarted }) => {
                 <div className="w-8 h-8 rounded-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center text-sm font-semibold">
                   3
                 </div>
-                <h3 className="text-xl font-semibold">Private & offline</h3>
+                <h3 className="text-xl font-semibold">Sync & backup</h3>
               </div>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Data stays in your browser. Export anytime for backup, import to
-                restore.
+                Choose local storage for privacy or enable cloud sync for
+                cross-device access. Your data, your choice.
               </p>
             </motion.div>
           </div>
@@ -407,8 +432,8 @@ const LandingPage = ({ onGetStarted }) => {
               </a>
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-500">
-              MyNote<span className="text-yellow-500">.</span> · Local-storage ·
-              No sign-up · Open source
+              MyNote<span className="text-yellow-500">.</span> · Local & Cloud
+              Storage · Optional sign-up · Open source
             </p>
           </div>
         </div>

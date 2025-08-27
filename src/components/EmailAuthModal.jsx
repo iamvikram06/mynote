@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaTimes, FaEye, FaEyeSlash } from "react-icons/fa";
 
 function isValidEmail(e) {
   return !!e && /\S+@\S+\.\S+/.test(e);
@@ -10,6 +12,8 @@ export default function EmailAuthModal({
   onSignIn,
   onSignUp,
   onReset,
+  loading: parentLoading = false,
+  error: parentError = null,
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +22,9 @@ export default function EmailAuthModal({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // Use parent loading state if provided, otherwise use local
+  const isLoading = parentLoading || loading;
 
   useEffect(() => {
     if (!open) {
@@ -31,7 +38,12 @@ export default function EmailAuthModal({
     }
   }, [open]);
 
-  if (!open) return null;
+  // Handle parent error
+  useEffect(() => {
+    if (parentError) {
+      setError(parentError);
+    }
+  }, [parentError]);
 
   const submit = async () => {
     setError("");
@@ -64,129 +76,221 @@ export default function EmailAuthModal({
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      submit();
+    }
+  };
+
+  const getModeConfig = () => {
+    switch (mode) {
+      case "signin":
+        return {
+          title: "Sign in",
+          subtitle: "Welcome back to My Notes",
+          buttonText: "Sign In",
+        };
+      case "signup":
+        return {
+          title: "Sign up",
+          subtitle: "Create your account to get started",
+          buttonText: "Sign Up",
+        };
+      case "reset":
+        return {
+          title: "Reset password",
+          subtitle: "Enter your email to receive a reset link",
+          buttonText: "Send Reset Link",
+        };
+      default:
+        return {};
+    }
+  };
+
+  const config = getModeConfig();
+
   return (
-    <div className="fixed min-w-full inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-md w-full p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">
-            {mode === "signin" && "Sign in"}
-            {mode === "signup" && "Create account"}
-            {mode === "reset" && "Reset password"}
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-slate-500 hover:text-slate-700"
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-black/50 flex items-center backdrop-blur-sm justify-center p-4 sm:p-6 z-50"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{
+              type: "spring",
+              damping: 25,
+              stiffness: 300,
+              duration: 0.3,
+            }}
+            className="bg-white dark:bg-slate-900 rounded-xl shadow-lg max-w-sm w-full p-6 sm:p-6 border border-slate-200 dark:border-slate-700"
+            onClick={(e) => e.stopPropagation()}
           >
-            ✕
-          </button>
-        </div>
-
-        <div>
-          <div className="mb-3">
-            <label className="block text-sm text-slate-600 dark:text-slate-300">
-              Email
-            </label>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-2 py-2 border rounded mt-1 text-black"
-              placeholder="you@example.com"
-              autoComplete="email"
-              inputMode="email"
-            />
-          </div>
-
-          {mode !== "reset" && (
-            <div className="mb-3">
-              <label className="block text-sm text-slate-600 dark:text-slate-300">
-                Password
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="flex-1 px-2 py-2 border rounded mt-1"
-                  placeholder="At least 6 characters"
-                  autoComplete={
-                    mode === "signup" ? "new-password" : "current-password"
-                  }
-                />
-                <button
-                  onClick={() => setShowPassword((s) => !s)}
-                  className="text-sm text-slate-600 hover:underline"
-                  type="button"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                  {config.title}
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  {config.subtitle}
+                </p>
               </div>
-            </div>
-          )}
-
-          {error && <div className="text-sm text-rose-600 mb-2">{error}</div>}
-          {success && (
-            <div className="text-sm text-green-600 mb-2">{success}</div>
-          )}
-
-          <div className="flex items-center justify-between gap-2">
-            <div>
               <button
-                onClick={submit}
-                disabled={loading}
-                className={`px-3 py-2 bg-slate-900 text-white rounded ${
-                  loading ? "opacity-60" : "hover:opacity-90"
-                }`}
+                onClick={onClose}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
               >
-                {loading
-                  ? "Please wait..."
-                  : mode === "signin"
-                  ? "Sign in"
-                  : mode === "signup"
-                  ? "Create account"
-                  : "Send reset"}
+                <FaTimes className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="ml-auto text-sm flex items-center gap-3">
-              {mode !== "signin" ? (
-                <button
-                  onClick={() => {
-                    setMode("signin");
-                    setError("");
-                    setSuccess("");
-                  }}
-                  className="underline"
-                >
-                  Back to sign in
-                </button>
-              ) : (
-                <>
+            {/* Form */}
+            <div className="space-y-6">
+              {/* Email Field */}
+              <div>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="w-full px-4 py-3 border outline-none border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-1 focus:ring-white focus:border-white transition-all"
+                  placeholder="Email address"
+                  autoComplete="email"
+                  inputMode="email"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Password Field */}
+              {mode !== "reset" && (
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="w-full px-4 py-3 pr-12 border border-slate-300 dark:border-slate-600 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-1 focus:ring-white focus:border-white transition-all"
+                    placeholder="Enter your password"
+                    autoComplete={
+                      mode === "signup" ? "new-password" : "current-password"
+                    }
+                    disabled={isLoading}
+                  />
                   <button
-                    onClick={() => {
-                      setMode("signup");
-                      setError("");
-                      setSuccess("");
-                    }}
-                    className="underline"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    type="button"
+                    disabled={isLoading}
                   >
-                    Create account
+                    {showPassword ? (
+                      <FaEyeSlash className="h-4 w-4" />
+                    ) : (
+                      <FaEye className="h-4 w-4" />
+                    )}
                   </button>
-                  <button
-                    onClick={() => {
-                      setMode("reset");
-                      setError("");
-                      setSuccess("");
-                    }}
-                    className="underline"
-                  >
-                    Forgot?
-                  </button>
-                </>
+                </div>
               )}
+
+              {/* Error/Success Messages */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 rounded-lg"
+                  >
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      {error}
+                    </p>
+                  </motion.div>
+                )}
+                {success && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="p-3 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/50 rounded-lg"
+                  >
+                    <p className="text-sm text-green-600 dark:text-green-400">
+                      {success}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Submit Button */}
+              <button
+                onClick={submit}
+                disabled={isLoading}
+                className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
+                  isLoading
+                    ? "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
+                    : "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+                }`}
+              >
+                {isLoading ? "Please wait..." : config.buttonText}
+              </button>
+
+              {/* Mode Switcher */}
+              <div className="text-center">
+                {mode === "signin" ? (
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => {
+                        setMode("reset");
+                        setError("");
+                        setSuccess("");
+                      }}
+                      className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                      disabled={isLoading}
+                    >
+                      Forgot password?
+                    </button>
+                    <div className="text-sm text-slate-500 dark:text-slate-400">
+                      Don't have an account?{" "}
+                      <button
+                        onClick={() => {
+                          setMode("signup");
+                          setError("");
+                          setSuccess("");
+                        }}
+                        className="text-slate-900 dark:text-slate-100 hover:underline font-medium"
+                        disabled={isLoading}
+                      >
+                        Sign Up
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-slate-500 dark:text-slate-400">
+                    Already have an account?{" "}
+                    <button
+                      onClick={() => {
+                        setMode("signin");
+                        setError("");
+                        setSuccess("");
+                      }}
+                      className="text-slate-900 dark:text-slate-100 hover:underline font-medium"
+                      disabled={isLoading}
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

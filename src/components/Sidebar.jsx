@@ -1,12 +1,17 @@
 import React from "react";
 import AnimatedTitle from "./AnimatedTitle";
 
-function Sidebar({ activeView, onViewChange, onClose }) {
-  // const navigate = useNavigation();
-
-  // const home = {
-  //   navigate('/home');
-  // }
+function Sidebar({
+  activeView,
+  onViewChange,
+  onClose,
+  user,
+  firebaseReady,
+  cloudEnabled,
+  onCloudToggle,
+  onSignIn,
+  onSignOut,
+}) {
   const menuItems = [
     {
       id: "notes",
@@ -69,11 +74,11 @@ function Sidebar({ activeView, onViewChange, onClose }) {
   ];
 
   return (
-    <div className="w-56 md:w-60 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full">
+    <div className="w-64 sm:w-56 md:w-60 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full">
       {/* Logo/Header */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2">
-            {/* <div
+          {/* <div
               className="w-7 h-7 bg-slate-900 dark:bg-slate-100 rounded-lg flex items-center justify-center transition-transform transform hover:scale-105 hover:shadow-[0_8px_24px_rgba(245,158,11,0.12)] hover:bg-yellow-50 dark:hover:bg-yellow-900/10 cursor-pointer group"
               aria-hidden="true"
             >
@@ -144,16 +149,102 @@ function Sidebar({ activeView, onViewChange, onClose }) {
         </ul>
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 flex border-t border-slate-200 dark:border-slate-800">
-      
-        <div className="flex items-center gap-1 mr-1">
-          <span className="w-2 h-2 bg-rose-500"></span>
-          <span className="w-2 h-2 bg-amber-500"></span>
-          <span className="w-2 h-2 bg-sky-500 "></span>
-        </div>
-        <div className="text-xs text-slate-500 dark:text-slate-400">
-          Organize your thoughts
+      {/* Authentication Footer */}
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800">
+        {/* User Status */}
+        {user ? (
+          <div className="space-y-3">
+            {/* User Info */}
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
+              <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                {(user.displayName || user.email).charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                  {user.displayName || user.email}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  {user.email}
+                </div>
+              </div>
+              <button
+                onClick={onSignOut}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                title="Sign Out"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Cloud Sync Toggle */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-600 dark:text-slate-400">
+                Cloud
+              </span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={cloudEnabled}
+                  onChange={onCloudToggle}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500"></div>
+              </label>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Sign In Button */}
+            <button
+              onClick={onSignIn}
+              disabled={!firebaseReady}
+              className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
+                !firebaseReady
+                  ? "bg-slate-800 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-800 hover:bg-gray-700 text-white shadow-sm hover:shadow-md"
+              }`}
+              title="Sign In"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                />
+              </svg>
+              Sign In
+            </button>
+          </div>
+        )}
+
+        {/* App Info */}
+        <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 bg-rose-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-sky-500 rounded-full"></span>
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            My Notes<span className="text-yellow-500">.</span>
+          </div>
         </div>
       </div>
     </div>
