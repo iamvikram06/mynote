@@ -13,7 +13,7 @@ function TagFilter({ tags, active, onToggle }) {
             className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs border transition-colors ${
               isActive
                 ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100"
-                : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900"
+                : "border-slate-300 text-slate-600 dark:text-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
             }`}
           >
             #{tag}

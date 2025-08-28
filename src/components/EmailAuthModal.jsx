@@ -130,16 +130,16 @@ export default function EmailAuthModal({
               stiffness: 300,
               duration: 0.3,
             }}
-            className="bg-white dark:bg-slate-900 rounded-xl shadow-lg max-w-sm w-full p-6 sm:p-6 border border-slate-200 dark:border-slate-700"
+            className="bg-white dark:bg-slate-900 rounded-xl shadow-lg max-w-sm w-full p-4 sm:p-6 border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                   {config.title}
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
                   {config.subtitle}
                 </p>
               </div>

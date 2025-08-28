@@ -49,6 +49,12 @@ export function loadNotes() {
       colorClass: n.colorClass || null,
       status: n.status || "todo",
       category: n.category || "notes",
+      // Reminders fields
+      dueAt: typeof n.dueAt === "number" ? n.dueAt : null,
+      remindAt: typeof n.remindAt === "number" ? n.remindAt : null,
+      recurrence: typeof n.recurrence === "string" ? n.recurrence : "none",
+      lastNotifiedAt:
+        typeof n.lastNotifiedAt === "number" ? n.lastNotifiedAt : null,
       updatedAt: typeof n.updatedAt === "number" ? n.updatedAt : Date.now(),
     }));
   } catch (error) {

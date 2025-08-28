@@ -51,6 +51,7 @@ function App() {
   const [emailAuthOpen, setEmailAuthOpen] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
+
   // Toast state
   const [toast, setToast] = useState({
     visible: false,
@@ -387,6 +388,121 @@ function App() {
     });
   };
 
+  const exportNotes = () => {
+    try {
+      const payload = {
+        exportedAt: Date.now(),
+        count: notes.length,
+        notes: notes,
+      };
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:]/g, "-");
+      a.href = url;
+      a.download = `mynotes-export-${ts}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setToast({
+        visible: true,
+        message: `Exported ${notes.length} note${
+          notes.length !== 1 ? "s" : ""
+        }`,
+        type: "success",
+      });
+      setTimeout(() => {
+        setToast((prev) => ({ ...prev, visible: false }));
+      }, 2000);
+    } catch (e) {
+      console.warn("Export failed:", e);
+      setToast({ visible: true, message: "Export failed", type: "error" });
+      setTimeout(() => {
+        setToast((prev) => ({ ...prev, visible: false }));
+      }, 2500);
+    }
+  };
+
+  // Reminder scheduler
+  useEffect(() => {
+    let intervalId;
+    const canNotify = () =>
+      typeof window !== "undefined" && "Notification" in window;
+    const requestPermissionIfNeeded = async () => {
+      if (!canNotify()) return false;
+      if (Notification.permission === "granted") return true;
+      if (Notification.permission === "denied") return false;
+      try {
+        const res = await Notification.requestPermission();
+        return res === "granted";
+      } catch {
+        return false;
+      }
+    };
+
+    const computeNextTime = (currentMs, recur) => {
+      if (!currentMs) return null;
+      const dayMs = 24 * 60 * 60 * 1000;
+      switch (recur) {
+        case "daily":
+          return currentMs + dayMs;
+        case "weekly":
+          return currentMs + 7 * dayMs;
+        case "monthly":
+          return currentMs + 30 * dayMs; // simple month approximation
+        default:
+          return null;
+      }
+    };
+
+    const tick = async () => {
+      const ok = await requestPermissionIfNeeded();
+      if (!ok) return;
+      const now = Date.now();
+      const updatedNotes = [];
+      let changed = false;
+      notes.forEach((n) => {
+        const shouldRemind =
+          typeof n.remindAt === "number" && n.remindAt && n.remindAt <= now;
+        const recentlyNotified =
+          typeof n.lastNotifiedAt === "number" &&
+          n.lastNotifiedAt &&
+          now - n.lastNotifiedAt < 60 * 1000; // avoid duplicate within 1 min
+        if (shouldRemind && !recentlyNotified) {
+          try {
+            const body = n.content ? n.content.slice(0, 120) : "";
+            new Notification(n.title || "Reminder", { body });
+          } catch {}
+          const nextRemind = computeNextTime(n.remindAt, n.recurrence);
+          const nextDue = computeNextTime(n.dueAt, n.recurrence);
+          const next = {
+            ...n,
+            lastNotifiedAt: now,
+            remindAt: nextRemind,
+            dueAt: nextDue ?? n.dueAt,
+            updatedAt: now,
+          };
+          updatedNotes.push(next);
+          changed = true;
+        } else {
+          updatedNotes.push(n);
+        }
+      });
+      if (changed) {
+        setNotes(updatedNotes);
+      }
+    };
+
+    intervalId = window.setInterval(tick, 60000); // check every minute
+    // run one immediate check on mount
+    tick();
+    return () => intervalId && clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notes]);
+
   const selected = useMemo(
     () => notes.find((n) => n.id === activeId) || null,
     [notes, activeId]
@@ -445,7 +561,7 @@ function App() {
           transition={{ duration: 0.3 }}
           className="min-h-[100dvh] bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors"
         >
-          <div className="flex h-screen overflow-hidden">
+          <div className="flex min-h-[100dvh] h-dvh overflow-hidden">
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
               <div
@@ -486,7 +602,6 @@ function App() {
                         : "Cloud sync disabled",
                       type: enabled ? "cloud" : "success",
                     });
-                    // Auto-hide after 3 seconds
                     setTimeout(() => {
                       setToast((prev) => ({ ...prev, visible: false }));
                     }, 3000);
@@ -499,7 +614,7 @@ function App() {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
               {/* Top Header */}
               <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div className="flex items-center justify-between">
@@ -527,7 +642,7 @@ function App() {
                     {/* Desktop sidebar toggle */}
                     <button
                       onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                      className="hidden md:flex p-2.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors bg-slate-100 dark:bg-slate-800"
+                      className="hidden md:flex p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors bg-slate-100 dark:bg-slate-800"
                       title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
                     >
                       <svg
@@ -631,20 +746,42 @@ function App() {
                       <span className="hidden sm:inline">Home</span>
                     </button>
 
+                    {/* Export All Notes */}
+                    <button
+                      onClick={exportNotes}
+                      className="rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 px-2 sm:px-3 py-1 sm:py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 flex items-center gap-2"
+                      title="Export all notes"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">Export</span>
+                    </button>
+
                     <ThemeToggle />
                   </div>
                 </div>
               </header>
 
               {/* Content Area */}
-              <main className="flex-1 overflow-hidden">
+              <main className="flex-1 overflow-hidden min-h-0">
                 {activeView === "notes" && (
-                  <div className="h-full flex flex-col xl:flex-row">
+                  <div className="h-full flex flex-col xl:flex-row min-h-0">
                     {/* Notes Sidebar */}
                     <div className="w-full xl:w-80 border-b xl:border-b-0 xl:border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900">
                       {/* Header with search */}
-                      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800">
-                        <div className="mb-3">
+                      <div className="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 sticky top-0 z-10">
+                        <div className="mb-2 sm:mb-3">
                           <p className="text-xs text-slate-500 dark:text-slate-400">
                             {filteredNotes.length} note
                             {filteredNotes.length !== 1 ? "s" : ""}
@@ -655,7 +792,7 @@ function App() {
 
                       {/* Tags filter */}
                       {allTags.length > 0 && (
-                        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800">
+                        <div className="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800">
                           <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                             Filter by tags
                           </h3>
@@ -674,7 +811,7 @@ function App() {
                       )}
 
                       {/* Notes list */}
-                      <div className="flex-1 overflow-y-auto bg-white dark:bg-slate-800">
+                      <div className="flex-1 overflow-y-auto bg-white dark:bg-slate-800 max-h-[45vh] xl:max-h-none">
                         <NoteList
                           notes={filteredNotes}
                           activeId={activeId}
@@ -685,7 +822,7 @@ function App() {
                     </div>
 
                     {/* Note Editor */}
-                    <div className="flex-1 bg-white dark:bg-slate-950 min-h-0">
+                    <div className="flex-1 bg-white dark:bg-slate-950 min-h-0 overflow-y-auto xl:overflow-visible h-[55vh] xl:h-auto">
                       <AnimatePresence mode="wait">
                         {selected ? (
                           <motion.div
@@ -707,13 +844,14 @@ function App() {
                               onUpdateStatus={updateNoteStatus}
                               onUpdateCategory={updateNoteCategory}
                               onClose={() => setActiveId(null)}
+                              onDelete={deleteNote}
                             />
                           </motion.div>
                         ) : (
-                          <div className="h-full flex flex-col items-center justify-center text-center p-4 sm:p-8">
-                            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                          <div className="h-full flex flex-col items-center justify-center text-center p-3 sm:p-4 md:p-6 lg:p-8">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-3 sm:mb-4">
                               <svg
-                                className="w-8 h-8 text-slate-400"
+                                className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -726,16 +864,16 @@ function App() {
                                 />
                               </svg>
                             </div>
-                            <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">
+                            <h3 className="text-base sm:text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">
                               No note selected
                             </h3>
-                            <p className="text-slate-500 dark:text-slate-400 max-w-sm">
+                            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-xs sm:max-w-sm px-2">
                               Select a note from the list or create a new one to
                               get started
                             </p>
                             <button
                               onClick={createNote}
-                              className="mt-4 px-4 py-2 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 rounded-md hover:opacity-90 transition-opacity"
+                              className="mt-3 sm:mt-4 px-3 sm:px-4 py-2 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 rounded-md hover:opacity-90 transition-opacity text-sm sm:text-base"
                             >
                               Create New Note
                             </button>
@@ -745,7 +883,6 @@ function App() {
                     </div>
                   </div>
                 )}
-
                 {activeView === "kanban" && (
                   <div className="h-full overflow-y-auto">
                     <KanbanView
@@ -848,6 +985,7 @@ function App() {
                               onUpdateStatus={updateNoteStatus}
                               onUpdateCategory={updateNoteCategory}
                               onClose={() => setActiveId(null)}
+                              onDelete={deleteNote}
                             />
                           </div>
                         </div>
@@ -859,7 +997,7 @@ function App() {
               {/* Floating Help Button */}
               <button
                 onClick={() => setHelpOpen(true)}
-                className="fixed bottom-4 right-4 z-50 rounded-full p-3 sm:p-3 shadow-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400 touch-target"
+                className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-50 rounded-full p-3 sm:p-3 shadow-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-400 touch-target"
                 title="How to use the app"
                 aria-label="Open help"
               >

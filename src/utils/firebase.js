@@ -133,10 +133,10 @@ export async function fetchUserNotes(userId) {
   if (!userId) throw new Error("User ID is required");
 
   try {
-    const notesCol = collection(db, "users", userId, "notes");
-    const q = query(notesCol, orderBy("updatedAt", "desc"));
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const notesCol = collection(db, "users", userId, "notes");
+  const q = query(notesCol, orderBy("updatedAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (error) {
     console.error("Error fetching user notes:", error);
     throw error;
@@ -149,7 +149,7 @@ export async function saveUserNote(userId, note) {
   if (!note || !note.id) throw new Error("Note with ID is required");
 
   try {
-    const ref = doc(db, "users", userId, "notes", note.id);
+  const ref = doc(db, "users", userId, "notes", note.id);
     const cleanedNote = cleanNoteData(note);
     await setDoc(ref, cleanedNote, { merge: true });
   } catch (error) {
@@ -164,8 +164,8 @@ export async function deleteUserNote(userId, noteId) {
   if (!noteId) throw new Error("Note ID is required");
 
   try {
-    const ref = doc(db, "users", userId, "notes", noteId);
-    await deleteDoc(ref);
+  const ref = doc(db, "users", userId, "notes", noteId);
+  await deleteDoc(ref);
   } catch (error) {
     console.error("Error deleting user note:", error);
     throw error;
@@ -178,8 +178,8 @@ export async function saveUserNotesBulk(userId, notes) {
   if (!Array.isArray(notes)) throw new Error("Notes must be an array");
 
   try {
-    const promises = notes.map((n) => saveUserNote(userId, n));
-    await Promise.all(promises);
+  const promises = notes.map((n) => saveUserNote(userId, n));
+  await Promise.all(promises);
   } catch (error) {
     console.error("Error saving user notes bulk:", error);
     throw error;

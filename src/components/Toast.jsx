@@ -38,7 +38,10 @@ export default function Toast({ message, type = "success", visible, onClose }) {
             stiffness: 300,
             duration: 0.3,
           }}
-          className={`fixed top-4 left-4 right-4 sm:left-auto sm:right-4 z-50 max-w-sm sm:w-full mx-auto sm:mx-0 p-4 rounded-lg border shadow-lg backdrop-blur-sm ${getColors()}`}
+          className={`fixed z-50 max-w-sm sm:w-full mx-auto sm:mx-0 p-4 rounded-lg border shadow-lg backdrop-blur-sm ${getColors()} left-4 right-4 sm:left-auto sm:right-4`}
+          style={{
+            top: `max(1rem, env(safe-area-inset-top))`,
+          }}
         >
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0">{getIcon()}</div>

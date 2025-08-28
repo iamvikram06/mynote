@@ -33,6 +33,25 @@ function Sidebar({
         </svg>
       ),
     },
+    {
+      id: "insights",
+      label: "Insights",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M11 3v18M6 12l5-9 5 9M5 21h14"
+          />
+        </svg>
+      ),
+    },
 
     {
       id: "todo",
@@ -75,18 +94,22 @@ function Sidebar({
   ];
 
   return (
-    <div className={`bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full transition-all duration-300 ease-in-out ${
-      collapsed 
-        ? "w-0 opacity-0 overflow-hidden" 
-        : "w-64 sm:w-56 md:w-60 opacity-100"
-    }`}>
+    <div
+      className={`bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full transition-all duration-300 ease-in-out ${
+        collapsed
+          ? "w-0 opacity-0 overflow-hidden"
+          : "w-64 sm:w-56 md:w-60 opacity-100"
+      }`}
+    >
       {/* Logo/Header */}
-      <div className={`p-4 border-b border-slate-200 dark:border-slate-800 transition-all duration-300 ${
-        collapsed ? "opacity-0" : "opacity-100"
-      }`}>
+      <div
+        className={`p-3 sm:p-4 border-b border-slate-200 dark:border-slate-800 transition-all duration-300 ${
+          collapsed ? "opacity-0" : "opacity-100"
+        }`}
+      >
         <div className="flex items-center gap-2">
           <AnimatedTitle
-            className="text-xl uppercase font-semibold tracking-tight text-slate-900 dark:text-slate-100"
+            className="text-lg sm:text-xl uppercase font-semibold tracking-tight text-slate-900 dark:text-slate-100"
             ariaLabel="My Notes"
             direction="forward"
             mode="alternating"
@@ -97,10 +120,10 @@ function Sidebar({
           {onClose && (
             <button
               onClick={onClose}
-              className="md:hidden p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="md:hidden p-1.5 sm:p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               <svg
-                className="w-5 h-5"
+                className="w-4 h-4 sm:w-5 sm:h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -118,15 +141,17 @@ function Sidebar({
       </div>
 
       {/* Navigation Menu */}
-      <nav className={`flex-1 p-3 transition-all duration-300 ${
-        collapsed ? "opacity-0" : "opacity-100"
-      }`}>
+      <nav
+        className={`flex-1 p-2 sm:p-3 transition-all duration-300 ${
+          collapsed ? "opacity-0" : "opacity-100"
+        }`}
+      >
         <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.id}>
               <button
                 onClick={() => onViewChange(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   activeView === item.id
                     ? "bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border-l-4 border-sky-500"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
@@ -141,28 +166,30 @@ function Sidebar({
       </nav>
 
       {/* Authentication Footer */}
-      <div className={`p-4 border-t border-slate-200 dark:border-slate-800 transition-all duration-300 ${
-        collapsed ? "opacity-0" : "opacity-100"
-      }`}>
+      <div
+        className={`p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 transition-all duration-300 ${
+          collapsed ? "opacity-0" : "opacity-100"
+        }`}
+      >
         {/* User Status */}
         {user ? (
           <div className="space-y-3">
             {/* User Info */}
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
-              <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+            <div className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-sky-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-medium">
                 {(user.displayName || user.email).charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                <div className="text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                   {user.displayName || user.email}
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
                   {user.email}
                 </div>
               </div>
               <button
                 onClick={onSignOut}
-                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 title="Sign Out"
               >
                 <svg

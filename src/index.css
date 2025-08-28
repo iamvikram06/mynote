@@ -81,6 +81,11 @@ body {
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
   }
+
+  /* Make tap highlight subtle on mobile */
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
   
   /* Responsive container */
   .container-responsive {
@@ -151,6 +156,11 @@ body {
   .sidebar-mobile {
     width: 100vw;
     max-width: 320px;
+  }
+
+  /* Avoid iOS bottom bar overlap */
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 }
 

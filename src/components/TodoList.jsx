@@ -40,8 +40,30 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
     }
   };
 
+  const getDueBadge = (note) => {
+    if (typeof note.dueAt !== "number" || !note.dueAt) return null;
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+    const isOverdue = note.dueAt < now;
+    const isSoon = note.dueAt >= now && note.dueAt - now <= oneDay;
+    const dateStr = new Date(note.dueAt).toLocaleDateString();
+    const base =
+      "px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border";
+    const cls = isOverdue
+      ? `${base} bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800`
+      : isSoon
+      ? `${base} bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800`
+      : `${base} bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600`;
+    const label = isOverdue ? "Overdue" : isSoon ? "Due soon" : "Due";
+    return (
+      <span className={cls} title={dateStr}>
+        {label}: {dateStr}
+      </span>
+    );
+  };
+
   return (
-    <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6">
+    <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6 min-h-0">
       {/* Header */}
       <div className="mb-6 sm:mb-8">
         {/* Stats */}
@@ -192,7 +214,7 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
       </div>
 
       {/* Todo Items */}
-      <div className="space-y-2 sm:space-y-3">
+      <div className="space-y-2 sm:space-y-3 min-h-0">
         <AnimatePresence mode="wait">
           {filteredNotes.map((note, index) => (
             <motion.div
@@ -203,7 +225,7 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
               transition={{ duration: 0.3, delay: index * 0.05 }}
               className={`group relative cursor-pointer rounded-2xl border-2 transition-all duration-300 hover:shadow-lg hover:scale-[1.01] ${
                 activeId === note.id
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20 shadow-lg"
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-lg"
                   : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
               onClick={() => onSelect(note.id)}
@@ -212,6 +234,11 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
               {activeId === note.id && (
                 <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 bg-blue-500 rounded-r-full shadow-sm"></div>
               )}
+
+              {/* Due badge */}
+              <div className="absolute top-2 right-2 flex-shrink-0">
+                {getDueBadge(note)}
+              </div>
 
               <div className="p-3 sm:p-4">
                 <div className="flex items-start gap-3 sm:gap-4">
@@ -258,8 +285,8 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                     <p
                       className={`text-xs sm:text-sm line-clamp-2 leading-relaxed transition-all duration-200 ${
                         note.status === "done"
-                          ? "text-slate-400 dark:text-slate-500 line-through"
-                          : "text-slate-600 dark:text-slate-400"
+                          ? "text-slate-500 dark:text-slate-400 line-through"
+                          : "text-slate-600 dark:text-slate-200"
                       }`}
                     >
                       {note.content || "No content"}
@@ -273,10 +300,10 @@ const TodoList = ({ notes, activeId, onSelect, onDelete, onUpdateStatus }) => {
                         e.stopPropagation();
                         onDelete(note.id);
                       }}
-                      className="p-1.5 sm:p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 hover:text-red-700 dark:hover:text-red-400 transform hover:scale-110 transition-all duration-200"
+                      className="w-8 h-8 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center justify-center"
                     >
                       <svg
-                        className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                        className="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

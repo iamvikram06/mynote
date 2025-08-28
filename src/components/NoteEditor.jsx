@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { FaStickyNote, FaTrash } from "react-icons/fa";
 
 function NoteEditor({
   note,
@@ -7,15 +8,25 @@ function NoteEditor({
   onUpdateStatus,
   onUpdateCategory,
   onClose,
+  onDelete,
 }) {
   const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content);
   const [tagInput, setTagInput] = useState("");
+  const toLocalInputValue = (ts) => {
+    if (!ts) return "";
+    const d = new Date(ts);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  };
+
+  const [dueDate, setDueDate] = useState(toLocalInputValue(note.dueAt));
   const isInitialMount = useRef(true);
 
   useEffect(() => {
     setTitle(note.title);
     setContent(note.content);
+    setDueDate(toLocalInputValue(note.dueAt));
   }, [note.id]);
 
   useEffect(() => {
@@ -23,9 +34,36 @@ function NoteEditor({
       isInitialMount.current = false;
       return;
     }
-    const next = { ...note, title, content };
+    const parseFlexibleLocal = (value) => {
+      if (!value) return null;
+      const native = new Date(value);
+      if (!isNaN(native.getTime())) return native.getTime();
+      const m = value
+        .trim()
+        .match(
+          /^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})(?:[ T](\d{1,2}):(\d{2}))?$/
+        );
+      if (m) {
+        const day = parseInt(m[1], 10);
+        const month = parseInt(m[2], 10) - 1;
+        const year = parseInt(m[3], 10);
+        const hour = m[4] ? parseInt(m[4], 10) : 9;
+        const minute = m[5] ? parseInt(m[5], 10) : 0;
+        const dt = new Date(year, month, day, hour, minute, 0, 0);
+        return dt.getTime();
+      }
+      return null;
+    };
+
+    const next = {
+      ...note,
+      title,
+      content,
+      // Interpret input value as local time and convert to UTC timestamp
+      dueAt: parseFlexibleLocal(dueDate),
+    };
     onChange(next);
-  }, [title, content]);
+  }, [title, content, dueDate]);
 
   const addTag = () => {
     const t = tagInput.trim();
@@ -103,13 +141,34 @@ function NoteEditor({
           </button>
         )}
       </div>
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+        {/* Note title with icon */}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <FaStickyNote className="text-slate-400 dark:text-slate-200 w-5 h-5" />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Note title..."
+            className="w-full bg-transparent text-base sm:text-lg md:text-xl font-semibold outline-none placeholder:text-slate-400 text-slate-900 dark:text-slate-100"
+          />
+        </div>
 
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title"
-        className="w-full bg-transparent text-base sm:text-lg md:text-xl font-semibold outline-none placeholder:text-slate-400 text-slate-900 dark:text-slate-100"
-      />
+        {/* Delete button with icon + label */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(note.id);
+          }}
+          className="flex items-center gap-2 px-2 py-2 rounded-lg dark:bg-slate-800 bg-slate-100 hover:bg-red-100 dark:hover:bg-red-800 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-200 transition-colors"
+          title="Delete note"
+          aria-label="Delete note"
+        >
+          <FaTrash className="w-4 h-4" />
+          <span className="text-sm font-medium hidden sm:inline">
+            Delete Note
+          </span>
+        </button>
+      </div>
 
       {/* Category and Status Selection */}
       <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
@@ -150,6 +209,19 @@ function NoteEditor({
             </select>
           </div>
         )}
+      </div>
+
+      {/* Deadline (Due) */}
+      <div className="mt-2 flex items-center gap-2 flex-wrap">
+        <label className="text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
+          Due:
+        </label>
+        <input
+          type="datetime-local"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="text-xs px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-400 text-slate-900 dark:text-slate-100"
+        />
       </div>
 
       <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2">
