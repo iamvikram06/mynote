@@ -8,6 +8,7 @@ import NoteList from "./components/NoteList";
 import NoteEditor from "./components/NoteEditor";
 import ThemeToggle from "./components/ThemeToggle";
 import KanbanView from "./components/KanbanView";
+import InsightsView from "./components/InsightsView";
 import Sidebar from "./components/Sidebar";
 import TodoList from "./components/TodoList";
 import LandingPage from "./components/LandingPage";
@@ -96,9 +97,7 @@ function App() {
     saveNotes(notes);
   }, [notes]);
 
-  // Init firebase if env vars present (optional)
   useEffect(() => {
-    // Try to read firebase config from window.__FIREBASE_CONFIG__ or env
     const cfg =
       window.__FIREBASE_CONFIG__ ||
       (process.env.REACT_APP_FIREBASE_API_KEY
@@ -128,7 +127,6 @@ function App() {
               ? { uid: u.uid, email: u.email, displayName: u.displayName }
               : null
           );
-          // Clear any auth errors when user state changes
           setAuthError(null);
         });
         return () => unsub && unsub();
@@ -139,10 +137,8 @@ function App() {
     }
   }, []);
 
-  // When cloud is enabled and user is set, switch storage mode and load remote notes
   useEffect(() => {
     if (cloudEnabled && user) {
-      // set storage to cloud (provide implementation)
       setStorageMode(
         "cloud",
         {
@@ -158,19 +154,15 @@ function App() {
         try {
           const remote = await fetchUserNotes(user.uid);
           if (Array.isArray(remote)) {
-            // Merge strategy: if both local and remote have data, ask the user
             const local = loadNotes();
             if (local.length > 0 && remote.length > 0) {
-              // Ask user preference
               const uploadLocal = window.confirm(
                 "Cloud data found. Click OK to upload local notes to cloud and keep local copy. Click Cancel to continue to other choices."
               );
               if (uploadLocal) {
-                // upload all local to cloud
                 saveUserNotesBulk(user.uid, local).catch((e) =>
                   console.warn("Bulk upload failed:", e)
                 );
-                // keep local notes
                 setNotes(local.map((n) => ({ ...n, _syncStatus: "pending" })));
               } else {
                 const useCloud = window.confirm(
@@ -181,14 +173,12 @@ function App() {
                     remote.map((n) => ({ ...n, _syncStatus: "synced" }))
                   );
                 } else {
-                  // merge: upload local notes that don't exist remotely
                   const remoteIds = new Set(remote.map((r) => r.id));
                   const toUpload = local.filter((l) => !remoteIds.has(l.id));
                   if (toUpload.length > 0)
                     saveUserNotesBulk(user.uid, toUpload).catch((e) =>
                       console.warn("Bulk merge upload failed:", e)
                     );
-                  // combine remote + local uniques
                   const combined = [...toUpload, ...remote].map((n) => ({
                     ...n,
                     _syncStatus: "synced",
@@ -199,19 +189,16 @@ function App() {
             } else if (remote.length > 0) {
               setNotes(remote.map((n) => ({ ...n, _syncStatus: "synced" })));
             } else {
-              // remote empty: keep local
               const localOnly = loadNotes();
               setNotes(
                 localOnly.map((n) => ({ ...n, _syncStatus: "pending" }))
               );
-              // optional: upload local automatically
             }
           }
         } catch (e) {
           console.warn("Failed to load remote notes:", e);
         }
       })();
-      // subscribe to per-note sync status updates
       const unsubbers = [];
       notes.forEach((n) => {
         const unsub = subscribeNoteStatus(n.id, (status) => {
@@ -228,7 +215,6 @@ function App() {
       // switch back to local
       setStorageMode("local", null, null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cloudEnabled, user]);
 
   const createNoteFromVoice = (text) => {
@@ -515,21 +501,46 @@ function App() {
     }
   }, [activeView]);
 
+  // Close any open editor/modals when switching views or going to landing
+  useEffect(() => {
+    setActiveId(null);
+  }, [activeView, showLanding]);
+
+  // Mobile/overlay scroll lock
+  useEffect(() => {
+    const anyOverlayOpen =
+      sidebarOpen ||
+      helpOpen ||
+      emailAuthOpen ||
+      (activeId && (activeView === "kanban" || activeView === "todo"));
+    const body = document.body;
+    if (anyOverlayOpen) {
+      const prevOverflow = body.style.overflow;
+      const prevTouchAction = body.style.touchAction;
+      const prevOverscrollBehavior = body.style.overscrollBehavior;
+      body.style.overflow = "hidden";
+      body.style.touchAction = "manipulation";
+      body.style.overscrollBehavior = "contain";
+      return () => {
+        body.style.overflow = prevOverflow;
+        body.style.touchAction = prevTouchAction;
+        body.style.overscrollBehavior = prevOverscrollBehavior;
+      };
+    }
+  }, [sidebarOpen, helpOpen, emailAuthOpen, activeId, activeView]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Toggle sidebar with Ctrl/Cmd + B
       if ((e.ctrlKey || e.metaKey) && e.key === "b") {
         e.preventDefault();
         setSidebarCollapsed(!sidebarCollapsed);
 
-        // Show toast notification
         setToast({
           visible: true,
           message: !sidebarCollapsed ? "Sidebar hidden" : "Sidebar shown",
           type: "success",
         });
-        // Auto-hide after 2 seconds
         setTimeout(() => {
           setToast((prev) => ({ ...prev, visible: false }));
         }, 2000);
@@ -616,9 +627,9 @@ function App() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden min-h-0">
               {/* Top Header */}
-              <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+              <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-2 sm:px-2 md:px-3 py-2 sm:py-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-4">
                     {/* Mobile menu button */}
                     <button
                       onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -671,6 +682,7 @@ function App() {
 
                     <h1 className="text-lg sm:text-xl font-semibold truncate">
                       {activeView === "notes" && "All Notes"}
+                      {activeView === "insights" && "Insights"}
                       {activeView === "kanban" && "Kanban Board"}
                       {activeView === "todo" && "Todo List"}
                     </h1>
@@ -694,7 +706,7 @@ function App() {
                           ? "Stop recording"
                           : "Add by voice"
                       }
-                      className={`rounded-md border px-2 py-1.5 sm:px-2 sm:py-1.5 text-sm focus:outline-none focus:ring-2 flex items-center gap-1 ${
+                      className={`inline-flex items-center justify-center rounded-md border h-8 w-8 sm:h-auto sm:w-auto sm:px-2 sm:py-1.5 text-sm focus:outline-none focus:ring-2 gap-1 ${
                         isListening
                           ? "border-rose-500 text-rose-600 dark:text-rose-400 focus:ring-rose-400"
                           : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 focus:ring-slate-400"
@@ -728,7 +740,7 @@ function App() {
                     {/* Home */}
                     <button
                       onClick={() => setShowLanding(true)}
-                      className="rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 px-2 sm:px-3 py-1 sm:py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 flex items-center gap-2"
+                      className="inline-flex items-center justify-center rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 h-8 w-8 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 gap-2"
                     >
                       <svg
                         className="w-4 h-4"
@@ -749,7 +761,7 @@ function App() {
                     {/* Export All Notes */}
                     <button
                       onClick={exportNotes}
-                      className="rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 px-2 sm:px-3 py-1 sm:py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 flex items-center gap-2"
+                      className="inline-flex items-center justify-center rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 h-8 w-8 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 gap-2"
                       title="Export all notes"
                     >
                       <svg
@@ -883,6 +895,8 @@ function App() {
                     </div>
                   </div>
                 )}
+
+                {activeView === "insights" && <InsightsView notes={notes} />}
                 {activeView === "kanban" && (
                   <div className="h-full overflow-y-auto">
                     <KanbanView
@@ -895,8 +909,8 @@ function App() {
 
                     {/* Modal for editing notes in Kanban view */}
                     {selected && (
-                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center p-4 z-50">
+                        <div className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
                           <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                             <h3 className="text-lg font-medium">Edit Note</h3>
                             <button
@@ -950,8 +964,8 @@ function App() {
 
                     {/* Modal for editing todos */}
                     {selected && (
-                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center p-4 z-50">
+                        <div className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
                           <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                             <h3 className="text-lg font-medium">Edit Todo</h3>
                             <button

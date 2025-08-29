@@ -139,7 +139,7 @@ function KanbanView({ notes, activeId, onSelect, onDelete, onUpdateStatus }) {
                     draggable
                     onDragStart={(e) => handleDragStart(e, note)}
                     onDragEnd={handleDragEnd}
-                    className={`group cursor-pointer rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 sm:p-3 shadow-sm hover:shadow-md transition-all ${
+                    className={`group cursor-pointer rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 sm:p-3 pb-9 shadow-sm hover:shadow-md transition-all relative ${
                       activeId === note.id ? "ring-2 ring-blue-500" : ""
                     } ${
                       draggedNote?.id === note.id ? "opacity-50" : ""
@@ -168,33 +168,37 @@ function KanbanView({ notes, activeId, onSelect, onDelete, onUpdateStatus }) {
                           {new Date(note.updatedAt).toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="flex items-start gap-2">
+                      <div className="flex items-start gap-1">
                         <div className="flex-shrink-0">
                           {renderDueBadge(note)}
                         </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(note.id);
-                          }}
-                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-md text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center flex-shrink-0 hover:bg-red-100/50 dark:hover:bg-red-900/20"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
                       </div>
                     </div>
+
+                    {/* Delete pinned bottom-right */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(note.id);
+                      }}
+                      className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 w-8 h-8 sm:w-9 sm:h-9 rounded-md text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-100/50 dark:hover:bg-red-900/20"
+                      title="Delete"
+                      aria-label="Delete"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
                   </motion.div>
                 ))}
               </AnimatePresence>

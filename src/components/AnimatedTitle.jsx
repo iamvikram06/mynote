@@ -38,7 +38,6 @@ export default function AnimatedTitle({
         const delay = index * baseDelay;
         const displayChar = char === " " ? "\u00A0" : char;
 
-        // Decide highlight for alternating or sequential mode
         let isHighlighted = false;
         if (mode === "alternating") {
           isHighlighted = hovered && i % 2 === 0;
@@ -46,7 +45,6 @@ export default function AnimatedTitle({
           isHighlighted = hovered;
         }
 
-        // Separate trailing punctuation (if present) so punctuation stays yellow
         let main = displayChar;
         let trailing = "";
         if (displayChar.length > 1) {

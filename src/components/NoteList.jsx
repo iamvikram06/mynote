@@ -49,15 +49,6 @@ const NoteList = ({ notes, activeId, onSelect, onDelete, layout = "list" }) => {
     return "border-sky-500 bg-sky-50 dark:bg-sky-900/30 shadow-lg scale-[1.02]";
   };
 
-  // const getActiveIndicatorColor = (note) => {
-  //   if (note.category === "notes") return "bg-purple-500";
-  //   if (note.status === "done") return "bg-emerald-500";
-  //   if (note.status === "in-progress") return "bg-amber-500";
-  //   if (note.status === "todo") return "bg-sky-500";
-
-  //   return "bg-sky-500";
-  // };
-
   const getStatusColor = (note) => {
     if (note.status === "done") {
       return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400";
@@ -109,7 +100,7 @@ const NoteList = ({ notes, activeId, onSelect, onDelete, layout = "list" }) => {
   // Responsive container classes
   const containerClass =
     layout === "grid"
-      ? "p-2 sm:p-3 md:p-4 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4"
+      ? "p-2 sm:p-3 md:p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4"
       : "p-2 sm:p-3 md:p-4 space-y-2 sm:space-y-3 md:space-y-4";
 
   return (
@@ -123,14 +114,6 @@ const NoteList = ({ notes, activeId, onSelect, onDelete, layout = "list" }) => {
             activeId === note.id
           )}`}
         >
-          {/* Active indicator */}
-          {activeId === note.id && (
-            <div
-            // className={`absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-6 sm:h-8 rounded-r-full shadow-sm ${getActiveIndicatorColor(
-            //   note
-            // )}`}
-            ></div>
-          )}
 
           {/* Color accent bar */}
           <div
@@ -140,17 +123,17 @@ const NoteList = ({ notes, activeId, onSelect, onDelete, layout = "list" }) => {
           ></div>
 
           {/* Header row with inline due badge */}
-          <div className="p-2 sm:p-3 md:p-4 pr-10 sm:pr-12 pb-8 sm:pb-10">
+          <div className="p-2 sm:p-3 md:p-4 pr-12 sm:pr-16 pb-8 sm:pb-10">
             {/* Title + Description */}
             <div className="mb-2 sm:mb-3">
               <h4
-                className="font-semibold text-slate-900 dark:text-slate-100 mb-1 sm:mb-2 line-clamp-2 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors text-xs sm:text-sm md:text-base leading-tight"
+                className="font-semibold text-slate-900 dark:text-slate-100 mb-1 sm:mb-2 line-clamp-2 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors text-sm sm:text-base md:text-base leading-tight"
                 title={note.title || "Untitled"}
               >
                 {note.title || "Untitled"}
               </h4>
               <p
-                className="text-[11px] sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-2 sm:line-clamp-3 leading-relaxed group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors"
+                className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-2 sm:line-clamp-3 leading-relaxed group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors"
                 title={note.content || "No content"}
               >
                 {note.content || "No content"}

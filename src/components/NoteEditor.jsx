@@ -59,7 +59,6 @@ function NoteEditor({
       ...note,
       title,
       content,
-      // Interpret input value as local time and convert to UTC timestamp
       dueAt: parseFlexibleLocal(dueDate),
     };
     onChange(next);

@@ -93,6 +93,43 @@ body {
   }
 }
 
+/* Cursor trail effect */
+.cursor-trail {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: #f59e0b; /* amber-500 */
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.9;
+  animation: fadeOut 0.9s ease-out forwards;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+}
+
+/* Match dark theme accent */
+.dark .cursor-trail {
+  background: #38bdf8; /* sky-400 */
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.55);
+}
+
+@keyframes fadeOut {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+    filter: blur(0px);
+  }
+  70% {
+    opacity: 0.25;
+    filter: blur(1px);
+  }
+  100% {
+    transform: scale(0.6);
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+
 /* Mobile-specific styles */
 @media (max-width: 640px) {
   /* Ensure touch targets are large enough */
@@ -161,6 +198,11 @@ body {
   /* Avoid iOS bottom bar overlap */
   .safe-bottom {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Improve fixed header/footer safe areas */
+  .safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
   }
 }
 

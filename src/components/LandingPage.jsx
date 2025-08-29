@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import AnimatedTitle from "./AnimatedTitle";
+import { FaCheck } from "react-icons/fa6";
 const LandingPage = ({ onGetStarted }) => {
-  const [cursor, setCursor] = useState({ x: 0, y: 0 });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -11,35 +11,98 @@ const LandingPage = ({ onGetStarted }) => {
     return () => setMounted(false);
   }, []);
 
-  return (
-    <div
-      className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors"
-      onMouseMove={(e) => setCursor({ x: e.clientX, y: e.clientY })}
-    >
-      {/* Cursor-follow glow */}
-      {mounted && (
-        <motion.div
-          aria-hidden
-          className="pointer-events-none fixed -translate-x-1/2 -translate-y-1/2 z-[60]"
-          animate={{ x: cursor.x, y: cursor.y }}
-          transition={{
-            type: "spring",
-            stiffness: 120,
-            damping: 20,
-            mass: 0.1,
-          }}
-        >
-          <div
-            className="w-48 h-48 sm:w-80 sm:h-80 rounded-full blur-3xl opacity-60 mix-blend-screen"
-            style={{
-              background:
-                "radial-gradient(40% 40% at 50% 50%, rgba(250,204,21,0.45), rgba(56,189,248,0.35), rgba(99,102,241,0.25), rgba(255,255,255,0))",
-            }}
-          />
-          <div className="absolute inset-0 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-yellow-400 rounded-full shadow-[0_0_20px_rgba(250,204,21,0.8)]" />
-        </motion.div>
-      )}
+  useEffect(() => {
+    if (!mounted) return;
+    const finePointer =
+      window.matchMedia && window.matchMedia("(pointer: fine)");
+    const reducedMotion =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)");
+    let enabled =
+      !!finePointer &&
+      finePointer.matches &&
+      !(!!reducedMotion && reducedMotion.matches);
+    let raf = 0;
+    let lastX = 0;
+    let lastY = 0;
+    let lastTs = 0;
 
+    const spawn = (x, y) => {
+      const dot = document.createElement("div");
+      dot.className = "cursor-trail";
+      dot.style.left = `${x}px`;
+      dot.style.top = `${y}px`;
+      document.body.appendChild(dot);
+      const removeAfter = () => dot.remove();
+      dot.addEventListener("animationend", removeAfter, { once: true });
+    };
+
+    const handleMove = (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      const now = performance.now();
+      const dt = now - lastTs;
+      const dx = x - lastX;
+      const dy = y - lastY;
+      const dist = Math.hypot(dx, dy);
+      const needed = Math.min(4, Math.max(1, Math.floor(dist / 14)));
+      if (lastTs === 0) {
+        spawn(x, y);
+        lastTs = now;
+        lastX = x;
+        lastY = y;
+        return;
+      }
+      if (dt > 30 || needed > 1) {
+        for (let i = 0; i < needed; i++) {
+          const t = (i + 1) / needed;
+          spawn(lastX + dx * t, lastY + dy * t);
+        }
+        lastTs = now;
+        lastX = x;
+        lastY = y;
+      }
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {});
+    };
+
+    const attach = () => {
+      if (!enabled) return;
+      window.addEventListener("mousemove", handleMove, { passive: true });
+    };
+    const detach = () => {
+      window.removeEventListener("mousemove", handleMove);
+      cancelAnimationFrame(raf);
+      document.querySelectorAll(".cursor-trail").forEach((el) => el.remove());
+    };
+
+    attach();
+
+    const handleChange = () => {
+      const isFine = finePointer ? finePointer.matches : true;
+      const isReduced = reducedMotion ? reducedMotion.matches : false;
+      const nextEnabled = isFine && !isReduced;
+      if (nextEnabled === enabled) return;
+      enabled = nextEnabled;
+      detach();
+      lastX = 0;
+      lastY = 0;
+      lastTs = 0;
+      attach();
+    };
+    finePointer && finePointer.addEventListener?.("change", handleChange);
+    reducedMotion && reducedMotion.addEventListener?.("change", handleChange);
+
+    return () => {
+      detach();
+      finePointer && finePointer.removeEventListener?.("change", handleChange);
+      reducedMotion &&
+        reducedMotion.removeEventListener?.("change", handleChange);
+    };
+  }, [mounted]);
+
+  return (
+    <div className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
       {/* Header - Fixed */}
       <header
         className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800"
@@ -48,11 +111,11 @@ const LandingPage = ({ onGetStarted }) => {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div
-              className="w-8 h-8 bg-slate-900 dark:bg-slate-100 rounded-lg flex items-center justify-center transition-transform transform hover:scale-105 hover:shadow-[0_8px_24px_rgba(245,158,11,0.12)] hover:bg-yellow-50 dark:hover:bg-yellow-900/10 cursor-pointer group"
+              className="w-8 h-8 bg-slate-900 dark:bg-slate-100 rounded-lg flex items-center justify-center transition-transform transform hover:scale-105 hover:shadow-[0_8px_24px_rgba(245,158,11,0.12)]  cursor-pointer group"
               aria-hidden="true"
             >
               <svg
-                className="w-5 h-5 text-white dark:text-slate-900 group-hover:text-yellow-500 transition-colors"
+                className="w-5 h-5 text-white dark:text-slate-900 transition-colors"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -74,25 +137,17 @@ const LandingPage = ({ onGetStarted }) => {
               {"My Notes."}
             </AnimatedTitle>
           </div>
-          <div className="flex  gap-2">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
 
-            <div
+            <motion.button
               onClick={onGetStarted}
-              className="
-          p-1
-          rounded-md
-          text-sm
-          text-white
-          dark:text-black
-          cursor-pointer
-          dark:bg-white
-          bg-black
-          border
-          "
+              className="inline-flex items-center gap-3 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-2 py-1.5 rounded-md text-sm font-medium hover:opacity-90 transition-opacity focus:outline-none"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Step In
-            </div>
+              Get Started
+            </motion.button>
           </div>
         </div>
       </header>
@@ -105,6 +160,13 @@ const LandingPage = ({ onGetStarted }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
+            {/* Trust Badges */}
+            <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
+              <span className="flex items-center gap-2 px-3 py-2 rounded-full text-sm bg-gray-100 text-slate-900 border-[1px] border-slate-900 dark:border-white dark:bg-slate-900 dark:text-slate-300">
+                <FaCheck className="w-4 h-4 text-slate-900 dark:text-slate-300 " />
+                No account required
+              </span>
+            </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8">
               Organize Your
               <span className="block text-slate-600 dark:text-slate-400">
@@ -117,23 +179,13 @@ const LandingPage = ({ onGetStarted }) => {
               manage tasks, and organize your thoughts without distractions.
             </p>
 
-            {/* Trust Badges */}
-            <div className="mb-12 flex flex-wrap items-center justify-center gap-3">
-              <span className="px-4 py-2 rounded-full text-sm bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                No account required
-              </span>
-              <span className="px-4 py-2 rounded-full text-sm bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                Local Storage
-              </span>
-            </div>
-
             <motion.button
               onClick={onGetStarted}
-              className="inline-flex items-center gap-3 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-10 py-4 rounded-lg text-lg font-medium hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="inline-flex items-center gap-3 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-10 py-4 rounded-lg text-lg font-medium hover:opacity-90 transition-opacity focus:outline-none"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Get Started
+              Start writing now
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -153,7 +205,7 @@ const LandingPage = ({ onGetStarted }) => {
       </section>
 
       {/* Features Section - Full Screen */}
-      <section className="min-h-screen flex items-center justify-center px-4 sm:px-6">
+      <section className="min-h-screen flex items-center justify-center px-4 sm:px-6 mb-4">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -166,7 +218,7 @@ const LandingPage = ({ onGetStarted }) => {
               Everything You Need
             </h2>
             <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Powerful features designed to stay you organized and productive
+              Powerful features designed to stay you organized and productive.
             </p>
           </motion.div>
 
@@ -195,7 +247,7 @@ const LandingPage = ({ onGetStarted }) => {
               </div>
               <h3 className="text-2xl font-semibold mb-2">Smart Notes</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Create, edit, and organize notes with tags and categories
+                Create, edit, and organize notes with tags and categories.
               </p>
             </motion.div>
 
@@ -223,7 +275,7 @@ const LandingPage = ({ onGetStarted }) => {
               </div>
               <h3 className="text-2xl font-semibold mb-2">Kanban Board</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Visualize your workflow with drag-and-drop kanban boards
+                Visualize your workflow with drag-and-drop kanban boards.
               </p>
             </motion.div>
 
@@ -251,7 +303,7 @@ const LandingPage = ({ onGetStarted }) => {
               </div>
               <h3 className="text-2xl font-semibold mb-2">Todo Lists</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Track tasks and manage your daily productivity
+                Track tasks and manage your daily productivity.
               </p>
             </motion.div>
 
@@ -279,7 +331,7 @@ const LandingPage = ({ onGetStarted }) => {
               </div>
               <h3 className="text-2xl font-semibold mb-2">Cloud Sync</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Optional cloud sync keeps your notes safe across devices
+                Optional cloud sync keeps your notes safe across devices.
               </p>
             </motion.div>
           </div>
